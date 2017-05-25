@@ -1,4 +1,4 @@
-package apps;
+package com.yizhao.apps;
 
 /**
  * Testing data:

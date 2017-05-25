@@ -1,8 +1,8 @@
-package apps;
+package com.yizhao.apps;
 
 
-import apps.Connector.NetezzaConnector;
-import apps.Util.FileDeleteUtil;
+import com.yizhao.apps.Connector.NetezzaConnector;
+import com.yizhao.apps.Util.FileDeleteUtil;
 
 import java.io.File;
 

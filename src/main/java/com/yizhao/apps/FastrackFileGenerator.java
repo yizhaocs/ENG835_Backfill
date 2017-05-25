@@ -1,4 +1,4 @@
-package apps;
+package com.yizhao.apps;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;

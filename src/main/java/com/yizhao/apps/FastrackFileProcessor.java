@@ -1,4 +1,4 @@
-package apps;
+package com.yizhao.apps;
 
 import org.apache.commons.lang3.text.StrTokenizer;
 
