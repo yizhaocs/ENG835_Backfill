@@ -2,6 +2,7 @@ package apps;
 
 
 import apps.Connector.NetezzaConnector;
+import apps.Util.FileDeleteUtil;
 
 import java.io.File;
 
@@ -19,7 +20,7 @@ import java.io.File;
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac /workplace/yzhao/eng759_backfill_apac.csv /workplace/yzhao/apac_fastrack.csv 2
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac /workplace/yzhao/eng759_backfill_apac.csv /workplace/yzhao/apac_fastrack.csv 9
  */
-public class Main {
+public class BackfillMain {
     private static final String DEFAULT_FILE_PATH = "/workplace/yzhao/";
     /**
      * @param argv
@@ -50,7 +51,7 @@ public class Main {
                     FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + "_" + i + ".csv");
                     System.out.println("done with CSV file to fastrack file\n");
                     File f = new File(csvFileOutputPath);
-                    if(f.delete()){
+                    if(FileDeleteUtil.deleteFile(f) == 1){
                         System.out.println(csvFileOutputPath + " has deleted" + "\n");
                     }else{
                         System.out.println(csvFileOutputPath + " has failed to delete" + "\n");

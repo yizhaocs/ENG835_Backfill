@@ -37,6 +37,13 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
+
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -78,7 +85,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>com.yizhao.apps.Main</mainClass>
+                            <mainClass>com.yizhao.apps.BackfillMain</mainClass>
                         </manifest>
                     </archive>
 
