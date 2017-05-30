@@ -2,6 +2,7 @@ package com.yizhao.apps;
 
 
 import com.yizhao.apps.Connector.NetezzaConnector;
+import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 
 import java.io.File;
@@ -41,14 +42,16 @@ public class BackfillMain {
             }
 
             String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
-            String fastrackFileOutputPath = DEFAULT_FILE_PATH + table + "_fastrackFileOutputPath";
+            String fastrackFileOutputPath = DEFAULT_FILE_PATH;
 
             if(partition == null){
                 int i = 0;
                 while(i < 10){
                     NetezzaConnector.dataToCsv(table, csvFileOutputPath, String.valueOf(i));
                     System.out.println("done with ekv raws to CSV file \n");
-                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + "_" + i + ".csv");
+                    String currentDate = DateUtil.getCurrentDate();
+                    String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
+                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + i + ".united-lax1." + timeStamp + "000" + ".csv");
                     System.out.println("done with CSV file to fastrack file\n");
                     File f = new File(csvFileOutputPath);
                     if(FileDeleteUtil.deleteFile(f) == 1){
@@ -74,5 +77,7 @@ public class BackfillMain {
 
 
     }
+
+
 
 }

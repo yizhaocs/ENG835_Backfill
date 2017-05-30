@@ -1,5 +1,6 @@
 package com.yizhao.apps;
 
+import com.yizhao.apps.Util.DateUtil;
 import org.apache.commons.lang3.text.StrTokenizer;
 
 import java.io.File;
@@ -80,7 +81,7 @@ public class FastrackFileProcessor {
                         e2.printStackTrace();
                     }
                 }
-                long modification_ts_unixTime = date.getTime()/1000;
+                long modification_ts_unixTime = DateUtil.dateToUnixTime(date);
                 // true if read the first row of the file
                 if(preEventId == null && curEventId == null){
                     preEventId = event_id;
