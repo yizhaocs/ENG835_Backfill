@@ -6,6 +6,7 @@ import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 
 import java.io.File;
+import java.net.InetAddress;
 
 
 /**
@@ -13,6 +14,7 @@ import java.io.File;
  *         <p>
  *         build it:
  *              mvn clean package
+ *              scp /Users/yzhao/IdeaProjects/ENG835_Backfill/target/Backfill-jar-with-dependencies.jar manager:/home/yzhao/
  *         <p>
  *         Run it:
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac
@@ -55,8 +57,17 @@ public class BackfillMain {
                      * hostName has startwith properties:
                      *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
                      */
-                    String hostName = "localhost";
-                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + i + "." + hostName + "." + timeStamp + "000" + ".csv");
+
+                    String CurrentHostName = InetAddress.getLocalHost().getHostName();
+                    String fileHostName = null;
+                    // hdu.include.only.sources in common.properties
+                    if(CurrentHostName.contains("qa") || CurrentHostName.contains("manager")){
+                        fileHostName = "qa1-ps1-lax1";
+                    }else{
+                        fileHostName = "ps";
+                    }
+
+                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + i + "." + fileHostName + "." + timeStamp + "000" + ".csv");
                     System.out.println("done with CSV file to fastrack file\n");
                     File f = new File(csvFileOutputPath);
                     if(FileDeleteUtil.deleteFile(f) == 1){
