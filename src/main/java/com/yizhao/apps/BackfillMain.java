@@ -22,6 +22,8 @@ import java.net.InetAddress;
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac /workplace/yzhao/eng759_backfill_apac.csv /workplace/yzhao/apac_fastrack.csv 1
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac /workplace/yzhao/eng759_backfill_apac.csv /workplace/yzhao/apac_fastrack.csv 2
  *              java -jar Backfill-jar-with-dependencies.jar eng759_backfill_apac /workplace/yzhao/eng759_backfill_apac.csv /workplace/yzhao/apac_fastrack.csv 9
+ *
+ *              java -jar Backfill-jar-with-dependencies.jar ENG759_BACKFILL_PRICELINE 0
  */
 public class BackfillMain {
     private static final String DEFAULT_FILE_PATH = "/workplace/yzhao/";
