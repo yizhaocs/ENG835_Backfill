@@ -39,7 +39,63 @@ public class NetezzaConnector {
             // execute select SQL stetement
             statement.execute(selectTableSQL);
         } catch (SQLException e) {
-            System.out.println("Exception in NetezzaConnector:" + "\n");
+            System.out.println("Exception in NetezzaConnector.dataToCsv:" + "\n");
+            e.printStackTrace();
+
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+        }
+    }
+
+    public static void generateBackFillTable(String dpIds, String startDate, String endDate) throws SQLException {
+        if(dpIds == null){
+            System.out.println("dpIds is missing in NetezzaConnector.generateBackFillTable");
+            return;
+        }
+
+        if(startDate == null){
+            System.out.println("startDate is missing in NetezzaConnector.generateBackFillTable");
+            return;
+        }
+
+        if(endDate == null){
+            System.out.println("endDate is missing in NetezzaConnector.generateBackFillTable");
+            return;
+        }
+
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        String query = "CREATE TABLE ENG759_BACKFILL_APAC AS(\n" +
+                "SELECT EKV.EVENT_ID, EKV.KEY_ID, EKV.VALUE, EKV.COOKIE_ID, EKV.DP_ID, EKV.LOCATION_ID, EKV.MODIFICATION_TS\n" +
+                "FROM OPINMIND_PROD..event_key_value AS EKV\n" +
+                "LEFT JOIN OPINMIND_PROD..ekv_hotel AS EKV_H\n" +
+                "ON EKV.EVENT_ID=EKV_H.EVENT_ID\n" +
+                "LEFT JOIN OPINMIND_PROD..ekv_flight AS EKV_F\n" +
+                "ON EKV.EVENT_ID=EKV_F.EVENT_ID\n" +
+                "WHERE EKV.DP_ID in (" + dpIds + ")\n" +
+                "AND EKV_H.EVENT_ID IS NULL\n" +
+                "AND EKV_F.EVENT_ID IS NULL\n" +
+                "AND EKV.dw_modification_ts >= '" + startDate + "'\n" +
+                "AND EKV.dw_modification_ts <= '" + endDate + "'\n" +
+                "ORDER BY EKV.EVENT_ID);";
+
+        try {
+            dbConnection = getDBConnection();
+            statement = dbConnection.createStatement();
+
+            System.out.println("execute query: \n" + query);
+
+            // execute select SQL stetement
+            statement.execute(query);
+        } catch (SQLException e) {
+            System.out.println("Exception in NetezzaConnector.generateBackFillTable:" + "\n");
             e.printStackTrace();
 
         } finally {
