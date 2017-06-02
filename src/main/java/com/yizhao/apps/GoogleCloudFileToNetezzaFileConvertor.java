@@ -1,5 +1,7 @@
 package com.yizhao.apps;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Scanner;
@@ -9,8 +11,12 @@ import java.util.Scanner;
  * {"event_id":1097534875260,"cookie_id":106438361728,"dp_id":2452,"vertical":"hotel","activity_group":"prospecting","activity_type":"search","event_ts":"2016-12-18 14:03:31","hotel_city":"tokyo","page":"ot","location_id":64848}
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
-    public static void process(){
+    public static void main(String[] args){
+        process();
+    }
 
+    public static void process(){
+        readDir("/opt/opinmind/var/google/ekvhotel/error");
     }
 
 
@@ -36,7 +42,8 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         try {
             s = new Scanner(f);
             while (s.hasNextLine()) {
-
+                String line = s.nextLine();
+                parseJason(line);
             }
         }catch (Exception e){
 
@@ -45,5 +52,13 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 s.close();
             }
         }
+    }
+
+
+    public static void parseJason(String jsonObject){
+        JSONObject obj = new JSONObject(jsonObject);
+       // JSONObject event_id = obj.getString("event_id");
+        System.out.println(obj.get("event_id"));
+
     }
 }
