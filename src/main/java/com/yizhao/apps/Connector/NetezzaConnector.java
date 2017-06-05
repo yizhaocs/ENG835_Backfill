@@ -53,7 +53,7 @@ public class NetezzaConnector {
         }
     }
 
-    public static void generateBackFillTable(String dpIds, String startDate, String endDate) throws SQLException {
+    public static void generateBackFillTableForApac(String dpIds, String startDate, String endDate) throws SQLException {
         if(dpIds == null){
             System.out.println("dpIds is missing in NetezzaConnector.generateBackFillTable");
             return;
