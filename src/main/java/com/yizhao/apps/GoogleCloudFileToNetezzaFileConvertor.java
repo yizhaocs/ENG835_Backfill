@@ -1,5 +1,6 @@
 package com.yizhao.apps;
 
+import com.yizhao.apps.Util.DateUtil;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -53,13 +54,13 @@ import java.util.Scanner;
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
     public static void main(String[] args){
-        String outputPath = "/Users/yzhao/Desktop/test.csv";
-        process(outputPath);
+        String todayDate = DateUtil.getCurrentDate();
+        process("/opt/opinmind/var/google/ekvhotel/error", "/Users/yzhao/Desktop/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "ekvhotel");
+        process("/opt/opinmind/var/google/ekvflight/error", "/Users/yzhao/Desktop/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "ekvflight");
     }
 
-    public static void process(String outputPath){
-        readDir("/opt/opinmind/var/google/ekvhotel/error", outputPath, "ekvhotel");
-        // readDir("/opt/opinmind/var/google/ekvflight/error", outputPath, "ekvflight");
+    public static void process(String inputDirPath, String outputPath, String type){
+        readDir(inputDirPath, outputPath, type);
     }
 
 
