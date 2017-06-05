@@ -73,7 +73,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         for (int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             if (file.isFile() && file.getName().endsWith(".csv")) {
-                readFile(file, "output", type);
+                readFile(file, "/Users/yzhao/Desktop/test.csv", type);
             }
         }
     }
@@ -103,7 +103,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
 
     public static String parseJasonAndConvertToNetezzaFormat(String line, String type){
         String result = null;
-        String NULL = "null";
+        String NULL = "NULL";
         if(type.equals("ekvhotel")) {
             JSONObject obj = new JSONObject(line);
             String event_id = obj.get("event_id").toString();
