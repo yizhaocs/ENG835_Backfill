@@ -53,28 +53,29 @@ import java.util.Scanner;
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
     public static void main(String[] args){
-        process();
+        String outputPath = "/Users/yzhao/Desktop/test.csv";
+        process(outputPath);
     }
 
-    public static void process(){
-        readDir("/opt/opinmind/var/google/ekvhotel/error", "ekvhotel");
-        // readDir("/opt/opinmind/var/google/ekvflight/error", "ekvflight");
+    public static void process(String outputPath){
+        readDir("/opt/opinmind/var/google/ekvhotel/error", outputPath, "ekvhotel");
+        // readDir("/opt/opinmind/var/google/ekvflight/error", outputPath, "ekvflight");
     }
 
 
     /**
      * dirPath = "/path/to/files";
      *
-     * @param dirPath
+     * @param inputDirPath
      */
-    public static void readDir(String dirPath, String type){
-        File folder = new File(dirPath);
+    public static void readDir(String inputDirPath, String outputPath, String type){
+        File folder = new File(inputDirPath);
         File[] listOfFiles = folder.listFiles();
 
         for (int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             if (file.isFile() && file.getName().endsWith(".csv")) {
-                readFile(file, "/Users/yzhao/Desktop/test.csv", type);
+                readFile(file, outputPath, type);
             }
         }
     }
