@@ -1,4 +1,4 @@
-package com.yizhao.apps;
+package com.yizhao.apps.Model;
 
 /**
  * @author YI ZHAO

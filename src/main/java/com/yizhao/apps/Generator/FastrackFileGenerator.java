@@ -1,4 +1,6 @@
-package com.yizhao.apps;
+package com.yizhao.apps.Generator;
+
+import com.yizhao.apps.Model.FastrackFileDao;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;

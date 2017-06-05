@@ -1,4 +1,4 @@
-package com.yizhao.apps;
+package com.yizhao.apps.Generator;
 
 import org.json.JSONObject;
 

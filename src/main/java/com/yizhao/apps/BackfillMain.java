@@ -2,6 +2,7 @@ package com.yizhao.apps;
 
 
 import com.yizhao.apps.Connector.NetezzaConnector;
+import com.yizhao.apps.Processor.FastrackFileProcessor;
 import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 
