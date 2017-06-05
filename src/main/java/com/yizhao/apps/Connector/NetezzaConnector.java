@@ -28,7 +28,7 @@ public class NetezzaConnector {
                 "\n" +
                 "WHERE MOD(" + table + ".EVENT_ID, 10)=" + partition +
                 "\n" +
-                "ORDER BY " + table + ".EVENT_ID" + " LIMIT 100";
+                "ORDER BY " + table + ".EVENT_ID";
 
         try {
             dbConnection = getDBConnection();
