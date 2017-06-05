@@ -113,7 +113,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
 
     public static String parseJasonAndConvertToNetezzaFormat(String line, String type){
         String result = null;
-        String NULL = "NULL";
+        String NULL = "";
         if(type.equals("ekvhotel")) {
             JSONObject obj = new JSONObject(line);
             String event_id = obj.get("event_id").toString();
