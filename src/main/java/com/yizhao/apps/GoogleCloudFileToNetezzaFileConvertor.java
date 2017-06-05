@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -57,7 +58,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
 
     public static void process(){
         readDir("/opt/opinmind/var/google/ekvhotel/error", "ekvhotel");
-        readDir("/opt/opinmind/var/google/ekvflight/error", "ekvflight");
+        // readDir("/opt/opinmind/var/google/ekvflight/error", "ekvflight");
     }
 
 
@@ -96,6 +97,13 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         }finally {
             if (s != null) {
                 s.close();
+            }
+            if(out != null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
