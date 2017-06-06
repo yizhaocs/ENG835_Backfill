@@ -14,7 +14,7 @@ public class NetezzaConnector {
     private static final String DB_USER = "opinmind_dev_admin";
     private static final String DB_PASSWORD = "29JWmn2e";
 
-    public static void dataToCsv(String table, String csvFileOutputPath, String partition) throws SQLException {
+    public static void dataToCsvPartitionByMod(String table, String csvFileOutputPath, String partition) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
@@ -39,7 +39,50 @@ public class NetezzaConnector {
             // execute select SQL stetement
             statement.execute(selectTableSQL);
         } catch (SQLException e) {
-            System.out.println("Exception in NetezzaConnector.dataToCsv:" + "\n");
+            System.out.println("Exception in NetezzaConnector.dataToCsvPartitionByMod:" + "\n");
+            e.printStackTrace();
+
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+        }
+    }
+
+    public static void dataToCsvPartitionByYearMonth(String table, String csvFileOutputPath, String year, String month) throws SQLException {
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        String selectTableSQL = null;
+
+        selectTableSQL = "create external table \'" + csvFileOutputPath + "\'" +
+                "\n" +
+                "using (delim '|' escapechar '\\' remoteSource 'JDBC')" +
+                "\n" +
+                "as select * from " + table +
+                "\n" +
+                "WHERE " + table + ".MODIFICATION_TS >=" + year + "-" + month + "-01" +
+                "\n" +
+                "AND " + table + ".MODIFICATION_TS <=" + year + "-" + month + "-31" +
+                "\n" +
+                "ORDER BY " + table + ".EVENT_ID" +
+                "\n" +
+                "LIMIT 100";
+
+        try {
+            dbConnection = getDBConnection();
+            statement = dbConnection.createStatement();
+
+            System.out.println("execute query: \n" + selectTableSQL);
+
+            // execute select SQL stetement
+            statement.execute(selectTableSQL);
+        } catch (SQLException e) {
+            System.out.println("Exception in NetezzaConnector.dataToCsvPartitionByYearMonth:" + "\n");
             e.printStackTrace();
 
         } finally {
