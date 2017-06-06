@@ -65,9 +65,9 @@ public class NetezzaConnector {
                 "\n" +
                 "as select * from " + table +
                 "\n" +
-                "WHERE " + table + ".MODIFICATION_TS >=" + year + "-" + month + "-01" +
+                "WHERE " + table + ".MODIFICATION_TS >='" + year + "-" + month + "-01'" +
                 "\n" +
-                "AND " + table + ".MODIFICATION_TS <=" + year + "-" + month + "-31" +
+                "AND " + table + ".MODIFICATION_TS <='" + year + "-" + month + "-31'" +
                 "\n" +
                 "ORDER BY " + table + ".EVENT_ID" +
                 "\n" +

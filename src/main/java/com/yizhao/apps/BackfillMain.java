@@ -110,7 +110,7 @@ public class BackfillMain {
                     int count = 0;
                     String curYear = startYear;
                     String curYearMonth = startYearMonth;
-                    while (!curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
+                    while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                         NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
                         System.out.println("done with ekv raws to CSV file \n");
                         String currentDate = DateUtil.getCurrentDate();
