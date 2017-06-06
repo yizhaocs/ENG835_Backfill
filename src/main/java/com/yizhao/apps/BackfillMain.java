@@ -92,6 +92,13 @@ public class BackfillMain {
                 System.out.println("done with ekv raws to CSV file \n");
                 FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + partition + "." + fileHostName + "." + timeStamp + "000" + ".csv" );
                 System.out.println("done with CSV file to fastrack file\n");
+
+                File f = new File(csvFileOutputPath);
+                if(FileDeleteUtil.deleteFile(f) == 1){
+                    System.out.println(csvFileOutputPath + " has deleted" + "\n");
+                }else{
+                    System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
+                }
             }
 
 
