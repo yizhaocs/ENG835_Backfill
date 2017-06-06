@@ -21,7 +21,7 @@ public class BigQueryGenerator {
 
     public static void generate(String fileInput, String fileOutput){
         StringBuilder query = new StringBuilder();
-        query.append("select * from impact_prod.ekv_hotel_20161201 where event_id in (");
+        query.append("select event_id from impact_prod.ekv_hotel_20161201 where event_id in (");
         // Location of file to read
         File file = new File(fileInput);
         File fout = new File(fileOutput);
@@ -36,6 +36,10 @@ public class BigQueryGenerator {
                 String line = scanner.nextLine();
                 JSONObject obj = new JSONObject(line);
                 String event_id = obj.get("event_id").toString();
+                String event_ts = obj.get("event_ts").toString();
+                event_ts.replaceAll("-","");
+                char[] str = event_ts.toCharArray();
+                str[str.length - 1] = '1';
                 query.append(event_id);
                 if(scanner.hasNextLine()) {
                     query.append(",");
