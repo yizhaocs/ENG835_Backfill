@@ -19,13 +19,13 @@ import java.net.InetAddress;
  *              scp /Users/yzhao/IdeaProjects/ENG835_Backfill/target/Backfill-jar-with-dependencies.jar manager:/home/yzhao/
  *         <p>
  *         Run it:
- *              java -jar Backfill-jar-with-dependencies.jar d eng759_backfill_apac 2016-12 2017-03
- *              java -jar Backfill-jar-with-dependencies.jar d eng759_backfill_apac  2016-12
- *              java -jar Backfill-jar-with-dependencies.jar r eng759_backfill_apac  0
+ *              /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar d eng759_backfill_apac 2016-12 2017-03
+ *              /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar d eng759_backfill_apac  2016-12
+ *              /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar r eng759_backfill_apac  0
  *
  *
  *
- *              java -jar Backfill-jar-with-dependencies.jar d ENG759_BACKFILL_PRICELINE 2016-03 2017-03
+ *              /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar d ENG759_BACKFILL_PRICELINE 2016-03 2017-03
  */
 public class BackfillMain {
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
