@@ -111,20 +111,7 @@ public class BackfillMain {
                     String curYear = startYear;
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                        NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
-                        System.out.println("done with ekv raws to CSV file \n");
-                        String currentDate = DateUtil.getCurrentDate();
-                        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-
-                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + count + "." + fileHostName + "." + timeStamp + "000" + ".csv");
-                        System.out.println("done with CSV file to fastrack file\n");
-                        File f = new File(csvFileOutputPath);
-                        if (FileDeleteUtil.deleteFile(f) == 1) {
-                            System.out.println(csvFileOutputPath + " has deleted" + "\n");
-                        } else {
-                            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-                        }
+                        processPartitionByYearMonth(table,csvFileOutputPath, curYear, curYearMonth, fastrackFileOutputPath, count, fileHostName);
 
                         count++;
                         if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -137,23 +124,14 @@ public class BackfillMain {
                         } else {
                             System.out.println("curYear and curYearMonth are same as endYear and endYearMonth");
                         }
-
                     }
+
+                    // run for the final month
+                    processPartitionByYearMonth(table,csvFileOutputPath, curYear, curYearMonth, fastrackFileOutputPath, count, fileHostName);
+
                 } else {
-                    String currentDate = DateUtil.getCurrentDate();
-                    String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-                    NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, startYear, startYearMonth);
-                    System.out.println("done with ekv raws to CSV file \n");
-                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + "0" + "." + fileHostName + "." + timeStamp + "000" + ".csv");
-                    System.out.println("done with CSV file to fastrack file\n");
-
-                    File f = new File(csvFileOutputPath);
-                    if (FileDeleteUtil.deleteFile(f) == 1) {
-                        System.out.println(csvFileOutputPath + " has deleted" + "\n");
-                    } else {
-                        System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-                    }
+                    // only get one month
+                    processPartitionByYearMonth(table,csvFileOutputPath, startYear, startYearMonth, fastrackFileOutputPath, 0, fileHostName);
                 }
             }else if(mode.equals("r")){
                 if (partition == null) {
@@ -196,6 +174,23 @@ public class BackfillMain {
         } catch (Exception e) {
             System.out.println("Exception in Main:" + "\n");
             e.printStackTrace();
+        }
+    }
+
+    private static void processPartitionByYearMonth(String table, String csvFileOutputPath, String curYear, String curYearMonth, String fastrackFileOutputPath, int count, String fileHostName) throws Exception{
+        NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+        System.out.println("done with ekv raws to CSV file \n");
+        String currentDate = DateUtil.getCurrentDate();
+        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
+
+
+        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + count + "." + fileHostName + "." + timeStamp + "000" + ".csv");
+        System.out.println("done with CSV file to fastrack file\n");
+        File f = new File(csvFileOutputPath);
+        if (FileDeleteUtil.deleteFile(f) == 1) {
+            System.out.println(csvFileOutputPath + " has deleted" + "\n");
+        } else {
+            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
         }
     }
 }
