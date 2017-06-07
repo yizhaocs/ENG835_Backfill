@@ -143,7 +143,7 @@ public class BackfillMain {
                         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
 
-                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + i + "." + fileHostName + "." + timeStamp + "000" + ".csv");
+                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-00000" + i + 1 + "." + fileHostName + "." + timeStamp + "000" + ".csv");
                         System.out.println("done with CSV file to fastrack file\n");
                         File f = new File(csvFileOutputPath);
                         if(FileDeleteUtil.deleteFile(f) == 1){
