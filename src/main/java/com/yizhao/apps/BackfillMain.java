@@ -25,7 +25,7 @@ import java.net.InetAddress;
  *
  *
  *
- *              java -jar Backfill-jar-with-dependencies.jar d ENG759_BACKFILL_PRICELINE 2016-12
+ *              java -jar Backfill-jar-with-dependencies.jar d ENG759_BACKFILL_PRICELINE 2016-03 2017-03
  */
 public class BackfillMain {
     private static final String DEFAULT_FILE_PATH = "/workplace/yzhao/";

@@ -67,7 +67,7 @@ public class NetezzaConnector {
                 "\n" +
                 "WHERE " + table + ".MODIFICATION_TS >='" + year + "-" + month + "-01'" +
                 "\n" +
-                "AND " + table + ".MODIFICATION_TS <='" + year + "-" + month + "-31'" +
+                "AND " + table + ".MODIFICATION_TS <=last_day('" + year + "-" + month + "-01')" + // select last_day('2017-02-01')
                 "\n" +
                 "ORDER BY " + table + ".EVENT_ID" +
                 "\n" +
