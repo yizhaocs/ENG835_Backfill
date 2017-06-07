@@ -69,9 +69,7 @@ public class NetezzaConnector {
                 "\n" +
                 "AND " + table + ".MODIFICATION_TS <=last_day('" + year + "-" + month + "-01')" + // select last_day('2017-02-01')
                 "\n" +
-                "ORDER BY " + table + ".EVENT_ID" +
-                "\n" +
-                "LIMIT 100";
+                "ORDER BY " + table + ".EVENT_ID";
 
         try {
             dbConnection = getDBConnection();
