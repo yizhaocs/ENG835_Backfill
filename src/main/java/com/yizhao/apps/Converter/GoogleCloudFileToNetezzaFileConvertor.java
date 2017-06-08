@@ -70,8 +70,8 @@ import java.util.Scanner;
 public class GoogleCloudFileToNetezzaFileConvertor {
     public static void main(String[] args){
         String todayDate = DateUtil.getCurrentDate();
-        process("/opt/opinmind/var/google/ekvhotel/error", "/Users/yzhao/Desktop/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "ekvhotel");
-        process("/opt/opinmind/var/google/ekvflight/error", "/Users/yzhao/Desktop/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "ekvflight");
+        process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "ekvhotel");
+        process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "ekvflight");
     }
 
     public static void process(String inputDirPath, String outputPath, String type){
