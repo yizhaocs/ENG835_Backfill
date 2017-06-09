@@ -143,7 +143,7 @@ public class BackfillMain {
                         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
 
-                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv");
+                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
                         System.out.println("done with CSV file to fastrack file\n");
                         File f = new File(csvFileOutputPath);
                         if(FileDeleteUtil.deleteFile(f) == 1){
@@ -184,7 +184,7 @@ public class BackfillMain {
         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
 
-        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv");
+        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         System.out.println("done with CSV file to fastrack file\n");
         File f = new File(csvFileOutputPath);
         if (FileDeleteUtil.deleteFile(f) == 1) {
