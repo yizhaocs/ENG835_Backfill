@@ -160,7 +160,7 @@ public class BackfillMain {
 
                     NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
                     System.out.println("done with ekv raws to CSV file \n");
-                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv" );
+                    FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force" );
                     System.out.println("done with CSV file to fastrack file\n");
 
                     File f = new File(csvFileOutputPath);
