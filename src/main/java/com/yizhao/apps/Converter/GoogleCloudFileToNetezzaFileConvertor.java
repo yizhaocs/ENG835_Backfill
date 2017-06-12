@@ -93,10 +93,10 @@ public class GoogleCloudFileToNetezzaFileConvertor {
             System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
             for (int i = 0; i < listOfFiles.length; i++) {
                 File file = listOfFiles[i];
-                System.out.println("begin to convert file:" + file.getName());
+                System.out.println("begin of converting file:" + file.getName());
                 if (file.isFile() && file.getName().endsWith(".csv")) {
                     int count = readFile(out, file, type);
-                    System.out.println("end of converting file, count:" + count + " , for file :" + file.getName() + "\n");
+                    System.out.println("end of converting file with total converted count:" + count + "\n");
                 }
             }
         } catch (Exception e) {
