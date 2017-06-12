@@ -23,7 +23,7 @@ import java.util.Scanner;
  * "page":"ot",
  * "location_id":64848
  * }
- *
+ * <p>
  * google cloud format ekv flight:
  * {
  * "event_id":1077305980653,
@@ -60,21 +60,21 @@ import java.util.Scanner;
  * "user_id":"c1073ad1b55c2dc830b1d1f76cd2c848",
  * "location_id":47172
  * }
- *
+ * <p>
  * netezza format hotel:
- *      event_id,cookie_id,dp_id,vertical,activity_group,activity_type,event_ts,checkin_date,checkout_date,trip_duration,hotel_name,hotel_brand,hotel_city,hotel_state,hotel_country,number_of_rooms,number_of_travelers,currency_type,avg_daily_rate,hotel_code,booked_date,page,user_id,location_id"
- *
+ * event_id,cookie_id,dp_id,vertical,activity_group,activity_type,event_ts,checkin_date,checkout_date,trip_duration,hotel_name,hotel_brand,hotel_city,hotel_state,hotel_country,number_of_rooms,number_of_travelers,currency_type,avg_daily_rate,hotel_code,booked_date,page,user_id,location_id"
+ * <p>
  * netezza format flight:
- *      event_id,cookie_id,dp_id,vertical,activity_group,activity_type,event_ts,departure_date,return_date,origin_airport,destination_airport,air_carrier,cabin_class,cabin_class_group,currency_type,number_of_travelers,trip_duration,booked_date,airfare,page,user_id,location_id"
+ * event_id,cookie_id,dp_id,vertical,activity_group,activity_type,event_ts,departure_date,return_date,origin_airport,destination_airport,air_carrier,cabin_class,cabin_class_group,currency_type,number_of_travelers,trip_duration,booked_date,airfare,page,user_id,location_id"
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         String todayDate = DateUtil.getCurrentDate("yyyyMMdd");
         process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "hotel");
         process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "flight");
     }
 
-    public static void process(String inputDirPath, String outputPath, String type){
+    public static void process(String inputDirPath, String outputPath, String type) {
         readDir(inputDirPath, outputPath, type);
     }
 
@@ -84,27 +84,39 @@ public class GoogleCloudFileToNetezzaFileConvertor {
      *
      * @param inputDirPath
      */
-    public static void readDir(String inputDirPath, String outputPath, String type){
+    public static void readDir(String inputDirPath, String outputPath, String type) {
         File folder = new File(inputDirPath);
         File[] listOfFiles = folder.listFiles();
-
-        for (int i = 0; i < listOfFiles.length; i++) {
-            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
-            File file = listOfFiles[i];
-            if (file.isFile() && file.getName().endsWith(".csv")) {
-                int count = readFile(file, outputPath, type);
-                System.out.println("converted count:" + count + " , for file :" + file.getName());
+        FileWriter out = null;
+        try {
+            out = new FileWriter(outputPath);
+            for (int i = 0; i < listOfFiles.length; i++) {
+                System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
+                File file = listOfFiles[i];
+                if (file.isFile() && file.getName().endsWith(".csv")) {
+                    int count = readFile(out, file, type);
+                    System.out.println("converted count:" + count + " , for file :" + file.getName());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("failed in GoogleCloudFileToNetezzaFileConvertor.readDir");
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    public static int readFile(File f, String outputPath, String type){
+    public static int readFile(FileWriter out, File f, String type) {
         int count = 0;
-        FileWriter out = null;
+
         Scanner s = null;
         String line = null;
         try {
-            out = new FileWriter(outputPath);
             s = new Scanner(f);
             while (s.hasNextLine()) {
                 line = s.nextLine();
@@ -113,59 +125,50 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 out.write("\n");
                 count++;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("failed to parseJason:" + line);
-        }finally {
+        } finally {
             if (s != null) {
                 s.close();
-            }
-            if(out != null){
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
         return count;
     }
 
 
-    public static String parseJasonAndConvertToNetezzaFormat(String line, String type){
+    public static String parseJasonAndConvertToNetezzaFormat(String line, String type) {
         String result = null;
         String NULL = "";
         String dw_modification_ts = DateUtil.getCurrentDate("yyyy-MM-dd HH:mm:ss");
-        if(type.equals("hotel")) {
+        if (type.equals("hotel")) {
             JSONObject obj = new JSONObject(line);
-            String event_id = obj.isNull("event_id")? NULL : obj.get("event_id").toString();
-            String cookie_id = obj.isNull("cookie_id")? NULL : obj.get("cookie_id").toString();
-            String dp_id = obj.isNull("dp_id")? NULL : obj.get("dp_id").toString();
-            String vertical = obj.isNull("vertical")? NULL : obj.get("vertical").toString();
-            String activity_group = obj.isNull("activity_group")? NULL : obj.get("activity_group").toString();
-            String activity_type = obj.isNull("activity_type")? NULL : obj.get("activity_type").toString();
-            String event_ts = obj.isNull("event_ts")? NULL : obj.get("event_ts").toString();
-            String checkin_date = obj.isNull("checkin_date")? NULL : obj.get("checkin_date").toString();
-            String checkout_date = obj.isNull("checkout_date")? NULL : obj.get("checkout_date").toString();
-            String trip_duration = obj.isNull("trip_duration")? NULL : obj.get("trip_duration").toString();
-            String hotel_name = obj.isNull("hotel_name")? NULL : obj.get("hotel_name").toString();
-            String hotel_brand = obj.isNull("hotel_brand")? NULL : obj.get("hotel_brand").toString();
-            String hotel_city = obj.isNull("hotel_city")? NULL : obj.get("hotel_city").toString();
-            String hotel_state = obj.isNull("hotel_state")? NULL : obj.get("hotel_state").toString();
-            String hotel_country = obj.isNull("hotel_country")? NULL : obj.get("hotel_country").toString();
-            String number_of_rooms = obj.isNull("number_of_rooms")? NULL : obj.get("number_of_rooms").toString();
-            String number_of_travelers = obj.isNull("number_of_travelers")? NULL : obj.get("number_of_travelers").toString();
-            String currency_type = obj.isNull("currency_type")? NULL : obj.get("currency_type").toString();
-            String avg_daily_rate = obj.isNull("avg_daily_rate")? NULL : obj.get("avg_daily_rate").toString();
-            String hotel_code = obj.isNull("hotel_code")? NULL : obj.get("hotel_code").toString();
-            String booked_date = obj.isNull("booked_date")? NULL : obj.get("booked_date").toString();
-            String page = obj.isNull("page")? NULL : obj.get("page").toString();
-            String user_id = obj.isNull("user_id")? NULL : obj.get("user_id").toString();
-            String location_id = obj.isNull("location_id")? NULL : obj.get("location_id").toString();
+            String event_id = obj.isNull("event_id") ? NULL : obj.get("event_id").toString();
+            String cookie_id = obj.isNull("cookie_id") ? NULL : obj.get("cookie_id").toString();
+            String dp_id = obj.isNull("dp_id") ? NULL : obj.get("dp_id").toString();
+            String vertical = obj.isNull("vertical") ? NULL : obj.get("vertical").toString();
+            String activity_group = obj.isNull("activity_group") ? NULL : obj.get("activity_group").toString();
+            String activity_type = obj.isNull("activity_type") ? NULL : obj.get("activity_type").toString();
+            String event_ts = obj.isNull("event_ts") ? NULL : obj.get("event_ts").toString();
+            String checkin_date = obj.isNull("checkin_date") ? NULL : obj.get("checkin_date").toString();
+            String checkout_date = obj.isNull("checkout_date") ? NULL : obj.get("checkout_date").toString();
+            String trip_duration = obj.isNull("trip_duration") ? NULL : obj.get("trip_duration").toString();
+            String hotel_name = obj.isNull("hotel_name") ? NULL : obj.get("hotel_name").toString();
+            String hotel_brand = obj.isNull("hotel_brand") ? NULL : obj.get("hotel_brand").toString();
+            String hotel_city = obj.isNull("hotel_city") ? NULL : obj.get("hotel_city").toString();
+            String hotel_state = obj.isNull("hotel_state") ? NULL : obj.get("hotel_state").toString();
+            String hotel_country = obj.isNull("hotel_country") ? NULL : obj.get("hotel_country").toString();
+            String number_of_rooms = obj.isNull("number_of_rooms") ? NULL : obj.get("number_of_rooms").toString();
+            String number_of_travelers = obj.isNull("number_of_travelers") ? NULL : obj.get("number_of_travelers").toString();
+            String currency_type = obj.isNull("currency_type") ? NULL : obj.get("currency_type").toString();
+            String avg_daily_rate = obj.isNull("avg_daily_rate") ? NULL : obj.get("avg_daily_rate").toString();
+            String hotel_code = obj.isNull("hotel_code") ? NULL : obj.get("hotel_code").toString();
+            String booked_date = obj.isNull("booked_date") ? NULL : obj.get("booked_date").toString();
+            String page = obj.isNull("page") ? NULL : obj.get("page").toString();
+            String user_id = obj.isNull("user_id") ? NULL : obj.get("user_id").toString();
+            String location_id = obj.isNull("location_id") ? NULL : obj.get("location_id").toString();
 
 
-
-
-                    // event_id,
+            // event_id,
             // cookie_id,
             // dp_id,
             // vertical,
@@ -191,56 +194,55 @@ public class GoogleCloudFileToNetezzaFileConvertor {
             // location_id"
             result =
                     event_id + "|" +
-                    cookie_id + "|" +
-                    dp_id + "|" +
-                    vertical + "|" +
-                    activity_group + "|" +
-                    activity_type + "|" +
-                    event_ts + "|" +
-                    checkin_date + "|" + //checkin_date
-                    checkout_date + "|" + //checkout_date
-                    trip_duration + "|" + //trip_duration
-                    hotel_name + "|" + //hotel_name
-                    hotel_brand + "|" + //hotel_brand
-                    hotel_city + "|" + //
-                    hotel_state + "|" + // hotel_state
-                    hotel_country + "|" + // hotel_country
-                    number_of_rooms + "|" + // number_of_rooms
-                    number_of_travelers + "|" + // number_of_travelers
-                    currency_type + "|" + // currency_type
-                    avg_daily_rate + "|" + // avg_daily_rate
-                    hotel_code + "|" + // hotel_code
-                    booked_date + "|" + // booked_date
-                    page + "|" + //
-                    user_id + "|" + // user_id
-                    location_id + "|" +
-                    dw_modification_ts;
+                            cookie_id + "|" +
+                            dp_id + "|" +
+                            vertical + "|" +
+                            activity_group + "|" +
+                            activity_type + "|" +
+                            event_ts + "|" +
+                            checkin_date + "|" + //checkin_date
+                            checkout_date + "|" + //checkout_date
+                            trip_duration + "|" + //trip_duration
+                            hotel_name + "|" + //hotel_name
+                            hotel_brand + "|" + //hotel_brand
+                            hotel_city + "|" + //
+                            hotel_state + "|" + // hotel_state
+                            hotel_country + "|" + // hotel_country
+                            number_of_rooms + "|" + // number_of_rooms
+                            number_of_travelers + "|" + // number_of_travelers
+                            currency_type + "|" + // currency_type
+                            avg_daily_rate + "|" + // avg_daily_rate
+                            hotel_code + "|" + // hotel_code
+                            booked_date + "|" + // booked_date
+                            page + "|" + //
+                            user_id + "|" + // user_id
+                            location_id + "|" +
+                            dw_modification_ts;
 
-        }else if(type.equals("flight")){
+        } else if (type.equals("flight")) {
             JSONObject obj = new JSONObject(line);
             String event_id = obj.isNull("event_id") ? NULL : obj.get("event_id").toString();
-            String cookie_id = obj.isNull("cookie_id")? NULL : obj.get("cookie_id").toString();
-            String dp_id = obj.isNull("dp_id")? NULL : obj.get("dp_id").toString();
-            String vertical = obj.isNull("vertical")? NULL : obj.get("vertical").toString();
-            String activity_group = obj.isNull("activity_group")? NULL : obj.get("activity_group").toString();
-            String activity_type = obj.isNull("activity_type")? NULL : obj.get("activity_type").toString();
-            String event_ts = obj.isNull("event_ts")? NULL : obj.get("event_ts").toString();
-            String departure_date = obj.isNull("departure_date")? NULL : obj.get("departure_date").toString();
-            String return_date = obj.isNull("return_date")? NULL : obj.get("return_date").toString();
-            String origin_airport = obj.isNull("origin_airport")? NULL : obj.get("origin_airport").toString();
-            String destination_airport = obj.isNull("destination_airport")? NULL : obj.get("destination_airport").toString();
-            String air_carrier = obj.isNull("air_carrier")? NULL : obj.get("air_carrier").toString();
-            String cabin_class = obj.isNull("cabin_class")? NULL : obj.get("cabin_class").toString();
-            String cabin_class_group = obj.isNull("cabin_class_group")? NULL : obj.get("cabin_class_group").toString();
-            String currency_type = obj.isNull("currency_type")? NULL : obj.get("currency_type").toString();
-            String number_of_travelers = obj.isNull("number_of_travelers")? NULL : obj.get("number_of_travelers").toString();
-            String trip_duration = obj.isNull("trip_duration")? NULL : obj.get("trip_duration").toString();
-            String booked_date = obj.isNull("booked_date")? NULL : obj.get("booked_date").toString();
-            String airfare = obj.isNull("airfare")? NULL : obj.get("airfare").toString();
-            String page = obj.isNull("page")? NULL : obj.get("page").toString();
-            String user_id = obj.isNull("user_id")? NULL : obj.get("user_id").toString();
-            String location_id = obj.isNull("location_id")? NULL : obj.get("location_id").toString();
-
+            String cookie_id = obj.isNull("cookie_id") ? NULL : obj.get("cookie_id").toString();
+            String dp_id = obj.isNull("dp_id") ? NULL : obj.get("dp_id").toString();
+            String vertical = obj.isNull("vertical") ? NULL : obj.get("vertical").toString();
+            String activity_group = obj.isNull("activity_group") ? NULL : obj.get("activity_group").toString();
+            String activity_type = obj.isNull("activity_type") ? NULL : obj.get("activity_type").toString();
+            String event_ts = obj.isNull("event_ts") ? NULL : obj.get("event_ts").toString();
+            String departure_date = obj.isNull("departure_date") ? NULL : obj.get("departure_date").toString();
+            String return_date = obj.isNull("return_date") ? NULL : obj.get("return_date").toString();
+            String origin_airport = obj.isNull("origin_airport") ? NULL : obj.get("origin_airport").toString();
+            String destination_airport = obj.isNull("destination_airport") ? NULL : obj.get("destination_airport").toString();
+            String air_carrier = obj.isNull("air_carrier") ? NULL : obj.get("air_carrier").toString();
+            String cabin_class = obj.isNull("cabin_class") ? NULL : obj.get("cabin_class").toString();
+            String cabin_class_group = obj.isNull("cabin_class_group") ? NULL : obj.get("cabin_class_group").toString();
+            String currency_type = obj.isNull("currency_type") ? NULL : obj.get("currency_type").toString();
+            String number_of_travelers = obj.isNull("number_of_travelers") ? NULL : obj.get("number_of_travelers").toString();
+            String trip_duration = obj.isNull("trip_duration") ? NULL : obj.get("trip_duration").toString();
+            String booked_date = obj.isNull("booked_date") ? NULL : obj.get("booked_date").toString();
+            String airfare = obj.isNull("airfare") ? NULL : obj.get("airfare").toString();
+            String page = obj.isNull("page") ? NULL : obj.get("page").toString();
+            String user_id = obj.isNull("user_id") ? NULL : obj.get("user_id").toString();
+            String location_id = obj.isNull("location_id") ? NULL : obj.get("location_id").toString();
 
 
             // event_id,
