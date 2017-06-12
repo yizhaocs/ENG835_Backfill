@@ -70,8 +70,8 @@ import java.util.Scanner;
 public class GoogleCloudFileToNetezzaFileConvertor {
     public static void main(String[] args){
         String todayDate = DateUtil.getCurrentDate();
-        process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "ekvhotel");
-        process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "ekvflight");
+        process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "hotel");
+        process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "flight");
     }
 
     public static void process(String inputDirPath, String outputPath, String type){
@@ -129,7 +129,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
     public static String parseJasonAndConvertToNetezzaFormat(String line, String type){
         String result = null;
         String NULL = "";
-        if(type.equals("ekvhotel")) {
+        if(type.equals("hotel")) {
             JSONObject obj = new JSONObject(line);
             String event_id = obj.isNull("event_id")? NULL : obj.get("event_id").toString();
             String cookie_id = obj.isNull("cookie_id")? NULL : obj.get("cookie_id").toString();
@@ -208,7 +208,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                     user_id + "|" + // user_id
                     location_id;
 
-        }else if(type.equals("ekvflight")){
+        }else if(type.equals("flight")){
             JSONObject obj = new JSONObject(line);
             String event_id = obj.isNull("event_id") ? NULL : obj.get("event_id").toString();
             String cookie_id = obj.isNull("cookie_id")? NULL : obj.get("cookie_id").toString();
