@@ -69,7 +69,7 @@ import java.util.Scanner;
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
     public static void main(String[] args){
-        String todayDate = DateUtil.getCurrentDate();
+        String todayDate = DateUtil.getCurrentDate("yyyyMMdd");
         process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "hotel");
         process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "flight");
     }
@@ -89,14 +89,17 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         File[] listOfFiles = folder.listFiles();
 
         for (int i = 0; i < listOfFiles.length; i++) {
+            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
             File file = listOfFiles[i];
             if (file.isFile() && file.getName().endsWith(".csv")) {
-                readFile(file, outputPath, type);
+                int count = readFile(file, outputPath, type);
+                System.out.println("converted count:" + count + " , for file :" + file.getName());
             }
         }
     }
 
-    public static void readFile(File f, String outputPath, String type){
+    public static int readFile(File f, String outputPath, String type){
+        int count = 0;
         FileWriter out = null;
         Scanner s = null;
         String line = null;
@@ -108,6 +111,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 String netezzaFormatLine = parseJasonAndConvertToNetezzaFormat(line, type);
                 out.write(netezzaFormatLine);
                 out.write("\n");
+                count++;
             }
         }catch (Exception e){
             System.out.println("failed to parseJason:" + line);
@@ -123,12 +127,14 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 }
             }
         }
+        return count;
     }
 
 
     public static String parseJasonAndConvertToNetezzaFormat(String line, String type){
         String result = null;
         String NULL = "";
+        String dw_modification_ts = DateUtil.getCurrentDate("yyyy-MM-dd HH:mm:ss");
         if(type.equals("hotel")) {
             JSONObject obj = new JSONObject(line);
             String event_id = obj.isNull("event_id")? NULL : obj.get("event_id").toString();
@@ -158,7 +164,8 @@ public class GoogleCloudFileToNetezzaFileConvertor {
 
 
 
-            // event_id,
+
+                    // event_id,
             // cookie_id,
             // dp_id,
             // vertical,
@@ -206,7 +213,8 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                     booked_date + "|" + // booked_date
                     page + "|" + //
                     user_id + "|" + // user_id
-                    location_id;
+                    location_id + "|" +
+                    dw_modification_ts;
 
         }else if(type.equals("flight")){
             JSONObject obj = new JSONObject(line);
@@ -279,7 +287,8 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                             airfare + "|" +
                             page + "|" +
                             user_id + "|" +
-                            location_id;
+                            location_id + "|" +
+                            dw_modification_ts;
         }
         return result;
     }

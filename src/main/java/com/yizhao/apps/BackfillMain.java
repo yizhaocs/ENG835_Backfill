@@ -20,10 +20,11 @@ import java.net.InetAddress;
  *         scp /Users/yzhao/IdeaProjects/ENG835_Backfill/target/Backfill-jar-with-dependencies.jar manager:/home/yzhao/
  *         <p>
  *         Run it:
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/flightFiles/122016 /workplace/yzhao/netezzaFiles/apac/flightFiles/122016 122016 flight
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/flightFiles/012017 /workplace/yzhao/netezzaFiles/apac/flightFiles/012017 012017 flight
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016 /workplace/yzhao/netezzaFiles/apac/hotelFiles/122016 122016 hotel
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/012017 /workplace/yzhao/netezzaFiles/apac/hotelFiles/012017 012017 hotel
+ *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/flightFiles/122016/ /workplace/yzhao/netezzaFiles/apac/flightFiles/122016 122016 flight
+ *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/flightFiles/012017/ /workplace/yzhao/netezzaFiles/apac/flightFiles/012017 012017 flight
+ *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016/ /workplace/yzhao/netezzaFiles/apac/hotelFiles/122016 122016 hotel
+ *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/012017/ /workplace/yzhao/netezzaFiles/apac/hotelFiles/012017 012017 hotel
+ *
  *         <p>
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac 2016-12 2017-03
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac  2016-12
@@ -49,7 +50,7 @@ public class BackfillMain {
                 String outPutPath = argv[2];
                 String monthYear = argv[3];
                 String type = argv[4];
-                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_hotel_all_netezza-" + monthYear + "_"  + type + "_001.csv", type);
+                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_"  + type + "_001.csv", type);
             } else if (mode.equals("dump")) {
 
                 String option = null; // r is partition by reminder, d is partition by date
@@ -156,7 +157,7 @@ public class BackfillMain {
                         while (i < 10) {
                             NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, String.valueOf(i));
                             System.out.println("done with ekv raws to CSV file \n");
-                            String currentDate = DateUtil.getCurrentDate();
+                            String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
                             String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
 
@@ -172,7 +173,7 @@ public class BackfillMain {
                             i++;
                         }
                     } else {
-                        String currentDate = DateUtil.getCurrentDate();
+                        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
                         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
                         NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
@@ -199,7 +200,7 @@ public class BackfillMain {
     private static void processPartitionByYearMonth(String table, String csvFileOutputPath, String curYear, String curYearMonth, String fastrackFileOutputPath, int count, String fileHostName) throws Exception {
         NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
         System.out.println("done with ekv raws to CSV file \n");
-        String currentDate = DateUtil.getCurrentDate();
+        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
 

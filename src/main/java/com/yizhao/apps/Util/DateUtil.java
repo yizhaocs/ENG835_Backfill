@@ -14,8 +14,8 @@ public class DateUtil {
         return date.getTime()/1000;
     }
 
-    public static String getCurrentDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+    public static String getCurrentDate(String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         Date date = new Date();
         return dateFormat.format(date).toString();
     }
