@@ -90,12 +90,13 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         FileWriter out = null;
         try {
             out = new FileWriter(outputPath);
+            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
             for (int i = 0; i < listOfFiles.length; i++) {
-                System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
                 File file = listOfFiles[i];
+                System.out.println("begin to convert file:" + file.getName());
                 if (file.isFile() && file.getName().endsWith(".csv")) {
                     int count = readFile(out, file, type);
-                    System.out.println("converted count:" + count + " , for file :" + file.getName());
+                    System.out.println("end of converting file, count:" + count + " , for file :" + file.getName() + "\n");
                 }
             }
         } catch (Exception e) {
