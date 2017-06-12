@@ -75,7 +75,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
     }
 
     public static void process(String inputDirPath, String outputPath, String type) {
-        readDir(inputDirPath, outputPath, type);
+        readDirAndWriteToOutput(inputDirPath, outputPath, type);
     }
 
 
@@ -84,13 +84,13 @@ public class GoogleCloudFileToNetezzaFileConvertor {
      *
      * @param inputDirPath
      */
-    public static void readDir(String inputDirPath, String outputPath, String type) {
+    public static void readDirAndWriteToOutput(String inputDirPath, String outputPath, String type) {
         File folder = new File(inputDirPath);
         File[] listOfFiles = folder.listFiles();
         FileWriter out = null;
         try {
             out = new FileWriter(outputPath);
-            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDir.listOfFiles.length:" + listOfFiles.length);
+            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput.listOfFiles.length:" + listOfFiles.length);
             for (int i = 0; i < listOfFiles.length; i++) {
                 File file = listOfFiles[i];
                 System.out.println("begin of converting file:" + file.getName());
@@ -100,7 +100,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 }
             }
         } catch (Exception e) {
-            System.out.println("failed in GoogleCloudFileToNetezzaFileConvertor.readDir");
+            System.out.println("failed in GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput");
         } finally {
             if (out != null) {
                 try {
