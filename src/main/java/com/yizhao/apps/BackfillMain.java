@@ -21,10 +21,7 @@ import java.net.InetAddress;
  *         <p>
  *         Run it:
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/flightFiles/122016 /workplace/yzhao/netezzaFiles/apac/flightFiles/122016 122016 flight
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016 /workplace/yzhao/netezzaFiles/apac/hotelFiles/122016 122016 flight
- *
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016 /workplace/yzhao/netezzaFiles/apac/flightFiles/122016 122016 hotel
- *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016 /workplace/yzhao/netezzaFiles/apac/flightFiles/122016 122016 hotel
+ *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/122016 /workplace/yzhao/netezzaFiles/apac/hotelFiles/122016 122016 hotel
  *         <p>
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac 2016-12 2017-03
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac  2016-12
