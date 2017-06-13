@@ -135,7 +135,7 @@ public class BackfillMain {
                         String curYear = startYear;
                         String curYearMonth = startYearMonth;
                         while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                            processPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                            processPartition(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                             count++;
                             if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -151,21 +151,21 @@ public class BackfillMain {
                         }
 
                         // run for the final month
-                        processPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                        processPartition(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                     } else {
                         // only get one month
-                        processPartitionByYearMonth(table, csvFileOutputPath, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
+                        processPartition(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
                     }
                 } else if (option.equals("r")) {
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
-                            processPartitionByReminder(table, csvFileOutputPath, String.valueOf(i), fastrackFileOutputPath, fileHostName);
+                            processPartition(table, csvFileOutputPath,  String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
                             i++;
                         }
                     } else {
-                        processPartitionByReminder(table, csvFileOutputPath, partition, fastrackFileOutputPath, fileHostName);
+                        processPartition(table, csvFileOutputPath,  partition, null, null, fastrackFileOutputPath, fileHostName);
                     }
                 }
             }
@@ -176,31 +176,20 @@ public class BackfillMain {
 
     }
 
-    private static void processPartitionByYearMonth(String table, String csvFileOutputPath, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
-        NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
-        System.out.println("done with ekv raws to CSV file \n");
-        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
-        System.out.println("done with CSV file to fastrack file\n");
-        File f = new File(csvFileOutputPath);
-        if (FileDeleteUtil.deleteFile(f) == 1) {
-            System.out.println(csvFileOutputPath + " has deleted" + "\n");
-        } else {
-            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
+    private static void processPartition(String table, String csvFileOutputPath,String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+        // true then partition by date, false then partition by reminder of event_id,
+        if(partition == null) {
+            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+        }else {
+            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
         }
-    }
 
-    private static void processPartitionByReminder(String table, String csvFileOutputPath, String partition, String fastrackFileOutputPath, String fileHostName) throws Exception {
-        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-        NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
         System.out.println("done with ekv raws to CSV file \n");
+        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
+        String timeStamp = null;
+
         FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         System.out.println("done with CSV file to fastrack file\n");
-
         File f = new File(csvFileOutputPath);
         if (FileDeleteUtil.deleteFile(f) == 1) {
             System.out.println(csvFileOutputPath + " has deleted" + "\n");
