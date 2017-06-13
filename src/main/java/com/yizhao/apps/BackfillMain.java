@@ -10,6 +10,7 @@ import com.yizhao.apps.Util.MathUtil;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
 /**
@@ -35,6 +36,7 @@ import java.net.InetAddress;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d ENG759_BACKFILL_PRICELINE 2016-04 2017-03
  */
 public class BackfillMain {
+    private static ScheduledThreadPoolExecutor executor;
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
 
     /**
@@ -155,38 +157,11 @@ public class BackfillMain {
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
-                            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, String.valueOf(i));
-                            System.out.println("done with ekv raws to CSV file \n");
-                            String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-                            String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-
-                            FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
-                            System.out.println("done with CSV file to fastrack file\n");
-                            File f = new File(csvFileOutputPath);
-                            if (FileDeleteUtil.deleteFile(f) == 1) {
-                                System.out.println(csvFileOutputPath + " has deleted" + "\n");
-                            } else {
-                                System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-                            }
-
+                            processPartitionByReminder(table, csvFileOutputPath, String.valueOf(i), fastrackFileOutputPath, 0, fileHostName);
                             i++;
                         }
                     } else {
-                        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-                        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
-
-                        NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
-                        System.out.println("done with ekv raws to CSV file \n");
-                        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
-                        System.out.println("done with CSV file to fastrack file\n");
-
-                        File f = new File(csvFileOutputPath);
-                        if (FileDeleteUtil.deleteFile(f) == 1) {
-                            System.out.println(csvFileOutputPath + " has deleted" + "\n");
-                        } else {
-                            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-                        }
+                        processPartitionByReminder(table, csvFileOutputPath, partition, fastrackFileOutputPath, 0, fileHostName);
                     }
                 }
             }
@@ -203,9 +178,25 @@ public class BackfillMain {
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
 
-
         FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         System.out.println("done with CSV file to fastrack file\n");
+        File f = new File(csvFileOutputPath);
+        if (FileDeleteUtil.deleteFile(f) == 1) {
+            System.out.println(csvFileOutputPath + " has deleted" + "\n");
+        } else {
+            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
+        }
+    }
+
+    private static void processPartitionByReminder(String table, String csvFileOutputPath, String partition, String fastrackFileOutputPath, int count, String fileHostName) throws Exception {
+        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
+        String timeStamp = String.valueOf(DateUtil.getCurrentTimeInUnixTimestamp());
+
+        NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
+        System.out.println("done with ekv raws to CSV file \n");
+        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        System.out.println("done with CSV file to fastrack file\n");
+
         File f = new File(csvFileOutputPath);
         if (FileDeleteUtil.deleteFile(f) == 1) {
             System.out.println(csvFileOutputPath + " has deleted" + "\n");
