@@ -1,6 +1,7 @@
-package com.yizhao.apps.Scanner.FileIndexer;
+package com.yizhao.apps.Scanner.FileProcessor;
 
-import com.yizhao.apps.utils.FileUtils.general.FileMoveUtil;
+
+import com.yizhao.apps.Util.FileMoveUtil;
 
 import java.io.File;
 import java.io.IOException;

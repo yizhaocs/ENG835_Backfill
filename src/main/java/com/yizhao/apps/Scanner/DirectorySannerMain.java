@@ -4,7 +4,7 @@ package com.yizhao.apps.Scanner;
 
 import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
 import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
-import com.yizhao.apps.Scanner.FileIndexer.FileProcessor;
+import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
