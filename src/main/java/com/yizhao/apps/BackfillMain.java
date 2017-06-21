@@ -6,6 +6,7 @@ import com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor;
 import com.yizhao.apps.Processor.FastrackFileProcessor;
 import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
+import com.yizhao.apps.Util.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
 
 import java.io.File;
@@ -163,7 +164,7 @@ public class BackfillMain {
                         String curYear = startYear;
                         String curYearMonth = startYearMonth;
                         while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                            processPartition(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                            runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                             count++;
                             if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -179,21 +180,22 @@ public class BackfillMain {
                         }
 
                         // run for the final month
-                        processPartition(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                        runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                     } else {
                         // only get one month
-                        processPartition(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
+                        runBackfill(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
                     }
                 } else if (option.equals("r")) {
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
-                            processPartition(table, csvFileOutputPath,  String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
+                            runBackfill(table, csvFileOutputPath,  String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
                             i++;
                         }
                     } else {
-                        processPartition(table, csvFileOutputPath,  partition, null, null, fastrackFileOutputPath, fileHostName);
+                        runBackfill(table, csvFileOutputPath,  partition, null, null, fastrackFileOutputPath, fileHostName);
+
                     }
                 }
             }
@@ -204,14 +206,29 @@ public class BackfillMain {
 
     }
 
-    private static void processPartition(String table, String csvFileOutputPath,String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
+            // Step 1 - dumpEkvrawFromNetezza
+            dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, null, null);
+            // Step 2 - processEkvrawToGenerateFastrackFile
+            processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+            // Step 3 - move fastrack file to udcuv2 inbox
+            File file = new File(fastrackFileOutputPath);
+            File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
+            FileMoveUtil.moveFile(file, toDirectory);
+            // Step 4 -
+    }
+
+    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if(partition == null) {
             NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
         }else {
             NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
         }
+    }
 
+
+    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName){
         System.out.println("done with ekv raws to CSV file \n");
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = null;
