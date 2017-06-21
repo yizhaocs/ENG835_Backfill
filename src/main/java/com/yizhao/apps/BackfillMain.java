@@ -208,7 +208,7 @@ public class BackfillMain {
 
     private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
             // Step 1 - dumpEkvrawFromNetezza
-            dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, null, null);
+            dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
             // Step 2 - processEkvrawToGenerateFastrackFile
             processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
             // Step 3 - move fastrack file to udcuv2 inbox
