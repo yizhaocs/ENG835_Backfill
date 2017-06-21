@@ -4,6 +4,9 @@ package com.yizhao.apps;
 import com.yizhao.apps.Connector.NetezzaConnector;
 import com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor;
 import com.yizhao.apps.Processor.FastrackFileProcessor;
+import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
+import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
+import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
 import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 import com.yizhao.apps.Util.FileMoveUtil;
@@ -11,6 +14,8 @@ import com.yizhao.apps.Util.MathUtil;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
@@ -216,6 +221,14 @@ public class BackfillMain {
             File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
             FileMoveUtil.moveFile(file, toDirectory);
             // Step 4 -
+            File inputDir = new File("/Users/yzhao/Desktop/input");
+            File outputDir = new File("/Users/yzhao/Desktop/output");
+            BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+            FileCrawler fileCrawler = new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir);
+            new Thread(fileCrawler).start();
+
+            FileProcessor processor = new FileProcessor(blockingQueue, outputDir);
+            new Thread(processor).start();
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
