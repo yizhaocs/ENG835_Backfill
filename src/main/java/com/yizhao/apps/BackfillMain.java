@@ -216,19 +216,24 @@ public class BackfillMain {
             dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
             // Step 2 - processEkvrawToGenerateFastrackFile
             processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+
+        /*
+
             // Step 3 - move fastrack file to udcuv2 inbox
             File file = new File(fastrackFileOutputPath);
             File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
             FileMoveUtil.moveFile(file, toDirectory);
             // Step 4 -
-            File inputDir = new File("/Users/yzhao/Desktop/input");
-            File outputDir = new File("/Users/yzhao/Desktop/output");
+            File hdfs = new File("/opt/opinmind/var/hdfs/ekv/archive");
             BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-            FileCrawler fileCrawler = new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir);
+            FileCrawler fileCrawler = new FileCrawler(blockingQueue, new fastrackFileFilter(), hdfs);
             new Thread(fileCrawler).start();
 
-            FileProcessor processor = new FileProcessor(blockingQueue, outputDir);
+            FileProcessor processor = new FileProcessor(blockingQueue, null);
             new Thread(processor).start();
+
+        */
+
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {

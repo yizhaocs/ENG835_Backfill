@@ -1,6 +1,7 @@
 package com.yizhao.apps.Scanner.FileProcessor;
 
 
+import com.yizhao.apps.Util.FileDeleteUtil;
 import com.yizhao.apps.Util.FileMoveUtil;
 
 import java.io.File;
@@ -23,12 +24,16 @@ public class FileProcessor implements Runnable {
     public void run() {
         try {
             while (true) {
-                process(queue.take());
+                deleteFile(queue.take());
             }
         } catch (InterruptedException e) {
             System.out.println("Indexer Interrupted");
             Thread.currentThread().interrupt();
         }
+    }
+
+    public void deleteFile(File file) {
+        FileDeleteUtil.deleteFile(file);
     }
 
     public void process(File file) {
