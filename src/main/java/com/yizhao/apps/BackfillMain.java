@@ -228,10 +228,12 @@ public class BackfillMain {
             dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
             dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
             // Step 5 - to know the udcuv2 finish up processing the file
-            detectUdcuv2Finish("/opt/opinmind/var/udcuv2/inbox");
+            detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
 
 
             // Step final - clean up all concat dir
+            FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/google/ekvraw/concat", ".csv");
+            FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/hdfs/ekv/concat", ".csv");
             // Step final - clean up all thread
             destroy();
     }

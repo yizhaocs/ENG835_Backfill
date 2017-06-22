@@ -30,6 +30,7 @@ public class FileProcessor implements Runnable {
                     deleteFile(queue.take());
                 }else if(command.equals("foundNewFileInDir")){
                     if(queue.size() != 0){
+                        FileDeleteUtil.deleteFile(queue.take());
                     }
                 }
 
