@@ -221,15 +221,18 @@ public class BackfillMain {
             dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
             // Step 2 - processEkvrawToGenerateFastrackFile
             processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
-
-
             // Step 3 - move fastrack file to udcuv2 inbox
             File file = new File(fastrackFileOutputPath);
             File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
             FileMoveUtil.moveFile(file, toDirectory);
-            // Step 4 -
+            // Step 4 - make sure there is no files in following dirs
             dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
             dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+            // Step 5 - to know the udcuv2 finish up processing the file
+            detectUdcuv2Finish("/opt/opinmind/var/udcuv2/inbox");
+
+
+            // Step final - clean up all
 
     }
 
