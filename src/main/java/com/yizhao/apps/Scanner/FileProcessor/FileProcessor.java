@@ -1,8 +1,8 @@
 package com.yizhao.apps.Scanner.FileProcessor;
 
 
-import com.yizhao.apps.Util.FileDeleteUtil;
-import com.yizhao.apps.Util.FileMoveUtil;
+import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
+import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class FileProcessor implements Runnable {
     }
 
     public void deleteFile(File file) {
-        FileDeleteUtil.deleteFile(file);
+        FileDeleteUtil.deleteFilesUnderDir(file.getAbsolutePath(), ".csv");
     }
 
     public void foundNewFileInDir(File file) {

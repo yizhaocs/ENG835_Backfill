@@ -8,11 +8,10 @@ import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
 import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
 import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
 import com.yizhao.apps.Util.DateUtil;
-import com.yizhao.apps.Util.FileDeleteUtil;
-import com.yizhao.apps.Util.FileMoveUtil;
+import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
+import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
-import com.yizhao.apps.Util.ThreadUtil;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import com.yizhao.apps.Util.ThreadUtils.ThreadUtil;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -21,8 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -233,8 +231,9 @@ public class BackfillMain {
             detectUdcuv2Finish("/opt/opinmind/var/udcuv2/inbox");
 
 
-            // Step final - clean up all
-
+            // Step final - clean up all concat dir
+            // Step final - clean up all thread
+            destroy();
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
@@ -281,5 +280,12 @@ public class BackfillMain {
         BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
         threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
+    }
+
+    public static void destroy() {
+        for (String poolName : threadPools.keySet()) {
+            ThreadUtil.forceShutdownAfterWaiting( threadPools.get(poolName),
+                    "BackfillMain", 5000L, TimeUnit.MILLISECONDS );
+        }
     }
 }
