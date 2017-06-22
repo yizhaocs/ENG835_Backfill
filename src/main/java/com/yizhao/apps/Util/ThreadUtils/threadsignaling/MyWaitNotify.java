@@ -21,7 +21,7 @@ public class MyWaitNotify {
 
     public void doNotify(){
         synchronized(myMonitorObject){
-            wasSignalled = true; // wasSignalled object fixed for missed signals
+            wasSignalled = true;
             myMonitorObject.notify();
             System.out.println(Thread.currentThread().getName() + ": notify single thread...");
         }
@@ -30,7 +30,7 @@ public class MyWaitNotify {
 
     public void doNotifyAll(){
         synchronized(myMonitorObject){
-            wasSignalled = true; // wasSignalled object fixed for missed signals
+            wasSignalled = true;
             myMonitorObject.notifyAll();
             System.out.println(Thread.currentThread().getName() + ": notify all threads...");
         }
