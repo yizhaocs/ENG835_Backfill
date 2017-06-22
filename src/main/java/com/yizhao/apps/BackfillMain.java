@@ -11,6 +11,7 @@ import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 import com.yizhao.apps.Util.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
+import com.yizhao.apps.Util.ThreadUtil;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.File;
@@ -263,7 +264,7 @@ public class BackfillMain {
 
 
     private static void dirCleanThread(String fileSourceInput){
-        ExecutorService threadPool = newThread(fileSourceInput);
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
         File inputDir = new File(fileSourceInput);
         File outputDir = null;
 
@@ -273,27 +274,12 @@ public class BackfillMain {
     }
 
     private static void detectUdcuv2Finish(String fileSourceInput){
-        ExecutorService threadPool = newThread(fileSourceInput);
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
         File inputDir = new File(fileSourceInput);
         File outputDir = null;
 
         BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
         threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
-    }
-
-    private static ExecutorService newThread(String fileSourceInput){
-        ExecutorService threadPool = threadPools.get(fileSourceInput);
-        if (threadPool == null) {
-            BasicThreadFactory factory = new BasicThreadFactory.Builder()
-                    .namingPattern(fileSourceInput+"-%d")
-
-                    .daemon(true)
-                    .priority(Thread.NORM_PRIORITY)
-                    .build();
-            threadPool = Executors.newSingleThreadExecutor(factory);
-            threadPools.put(fileSourceInput, threadPool);
-        }
-        return threadPool;
     }
 }

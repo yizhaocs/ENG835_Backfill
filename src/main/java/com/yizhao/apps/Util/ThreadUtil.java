@@ -1,10 +1,13 @@
 package com.yizhao.apps.Util;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
@@ -14,6 +17,29 @@ import java.util.concurrent.TimeUnit;
 public class ThreadUtil {
     private static final Logger logger = Logger.getLogger(ThreadUtil.class);
 
+    /**
+     * ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+     * @param threadPools
+     * @param threadName
+     * @param daemon
+     * @param threadPriority
+     * @return
+     */
+    public static ExecutorService newThread(Map<String, ExecutorService> threadPools, String threadName, boolean daemon, int threadPriority){
+        ExecutorService threadPool = threadPools.get(threadName);
+        if (threadPool == null) {
+            BasicThreadFactory factory = new BasicThreadFactory.Builder()
+                    .namingPattern(threadName+"-%d")
+
+                    .daemon(daemon)
+                    .priority(threadPriority)
+                    .build();
+            threadPool = Executors.newSingleThreadExecutor(factory);
+            threadPools.put(threadName, threadPool);
+        }
+        return threadPool;
+    }
+    
     /**
      * Force shutdown (if required) an executor service after waiting for the
      * given amount of time.
