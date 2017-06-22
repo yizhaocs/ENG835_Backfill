@@ -18,7 +18,7 @@ public class DirectorySannerMain {
         FileCrawler fileCrawler = new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir);
         new Thread(fileCrawler).start();
 
-        FileProcessor processor = new FileProcessor(blockingQueue, outputDir);
+        FileProcessor processor = new FileProcessor(blockingQueue, outputDir, "delete");
         new Thread(processor).start();
     }
 }

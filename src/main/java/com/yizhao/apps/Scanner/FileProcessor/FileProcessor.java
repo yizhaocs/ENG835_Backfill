@@ -15,16 +15,24 @@ import java.util.concurrent.BlockingQueue;
 public class FileProcessor implements Runnable {
     private final BlockingQueue<File> queue;
     private final File outputDir;
+    private final String command;
 
-    public FileProcessor(BlockingQueue<File> queue, File outputDir) {
+    public FileProcessor(BlockingQueue<File> queue, File outputDir, String command) {
         this.queue = queue;
         this.outputDir = outputDir;
+        this.command = command;
     }
 
     public void run() {
         try {
             while (true) {
-                deleteFile(queue.take());
+                if(command.equals("delete")){
+                    deleteFile(queue.take());
+                }else if(command.equals("foundNewFileInDir")){
+                    if(queue.size() != 0){
+                    }
+                }
+
             }
         } catch (InterruptedException e) {
             System.out.println("Indexer Interrupted");
@@ -34,6 +42,11 @@ public class FileProcessor implements Runnable {
 
     public void deleteFile(File file) {
         FileDeleteUtil.deleteFile(file);
+    }
+
+    public void foundNewFileInDir(File file) {
+
+
     }
 
     public void process(File file) {

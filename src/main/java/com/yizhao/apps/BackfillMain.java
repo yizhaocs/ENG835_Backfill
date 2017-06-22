@@ -11,11 +11,16 @@ import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileDeleteUtil;
 import com.yizhao.apps.Util.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
@@ -74,7 +79,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d ENG759_BACKFILL_PRICELINE 2016-04 2017-03
  */
 public class BackfillMain {
-    private static ScheduledThreadPoolExecutor executor;
+    static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
 
     /**
@@ -217,22 +222,14 @@ public class BackfillMain {
             // Step 2 - processEkvrawToGenerateFastrackFile
             processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
 
-        /*
 
             // Step 3 - move fastrack file to udcuv2 inbox
             File file = new File(fastrackFileOutputPath);
             File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
             FileMoveUtil.moveFile(file, toDirectory);
             // Step 4 -
-            File hdfs = new File("/opt/opinmind/var/hdfs/ekv/archive");
-            BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-            FileCrawler fileCrawler = new FileCrawler(blockingQueue, new fastrackFileFilter(), hdfs);
-            new Thread(fileCrawler).start();
-
-            FileProcessor processor = new FileProcessor(blockingQueue, null);
-            new Thread(processor).start();
-
-        */
+            dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+            dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
 
     }
 
@@ -259,5 +256,41 @@ public class BackfillMain {
         } else {
             System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
         }
+    }
+
+
+    private static void dirCleanThread(String fileSourceInput){
+        ExecutorService threadPool = newThread(fileSourceInput);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
+    }
+
+    private static void detectUdcuv2Finish(String fileSourceInput){
+        ExecutorService threadPool = newThread(fileSourceInput);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
+    }
+
+    private static ExecutorService newThread(String fileSourceInput){
+        ExecutorService threadPool = threadPools.get(fileSourceInput);
+        if (threadPool == null) {
+            BasicThreadFactory factory = new BasicThreadFactory.Builder()
+                    .namingPattern(fileSourceInput+"-%d")
+
+                    .daemon(true)
+                    .priority(Thread.NORM_PRIORITY)
+                    .build();
+            threadPool = Executors.newSingleThreadExecutor(factory);
+            threadPools.put(fileSourceInput, threadPool);
+        }
+        return threadPool;
     }
 }

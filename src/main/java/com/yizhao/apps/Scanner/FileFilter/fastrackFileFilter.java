@@ -7,7 +7,7 @@ import java.io.FileFilter;
  * Created by yzhao on 6/13/17.
  */
 public class fastrackFileFilter implements FileFilter {
-    private final String[] okFileExtensions = new String[]{"csv"};
+    private final String[] okFileExtensions = new String[]{"csv", "force"};
 
     public boolean accept(File file) {
         for (String extension : okFileExtensions) {
