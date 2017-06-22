@@ -235,7 +235,7 @@ public class BackfillMain {
             FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/google/ekvraw/concat", ".csv");
             FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/hdfs/ekv/concat", ".csv");
             // Step final - clean up all thread
-            destroy();
+            ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
@@ -282,12 +282,5 @@ public class BackfillMain {
         BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
         threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
-    }
-
-    public static void destroy() {
-        for (String poolName : threadPools.keySet()) {
-            ThreadUtil.forceShutdownAfterWaiting( threadPools.get(poolName),
-                    "BackfillMain", 5000L, TimeUnit.MILLISECONDS );
-        }
     }
 }
