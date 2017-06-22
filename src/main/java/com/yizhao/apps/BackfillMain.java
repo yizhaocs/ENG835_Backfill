@@ -11,7 +11,7 @@ import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
-import com.yizhao.apps.Util.ThreadUtils.ThreadUtil;
+import com.yizhao.apps.Util.ThreadUtils.general.ThreadUtil;
 
 import java.io.File;
 import java.net.InetAddress;

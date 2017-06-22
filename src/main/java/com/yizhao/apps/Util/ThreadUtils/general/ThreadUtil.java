@@ -1,4 +1,4 @@
-package com.yizhao.apps.Util.ThreadUtils;
+package com.yizhao.apps.Util.ThreadUtils.general;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
