@@ -1,6 +1,7 @@
 package com.yizhao.apps.Scanner.FileProcessor;
 
 
+import com.yizhao.apps.BackfillMain;
 import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 
@@ -30,6 +31,7 @@ public class FileProcessor implements Runnable {
                     deleteFile(queue.take());
                 }else if(command.equals("foundNewFileInDir")){
                     if(queue.size() != 0){
+                        BackfillMain.getmMyWaitNotify().doNotify();
                         FileDeleteUtil.deleteFile(queue.take());
                     }
                 }

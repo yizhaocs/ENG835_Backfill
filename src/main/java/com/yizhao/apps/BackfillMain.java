@@ -12,6 +12,7 @@ import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
 import com.yizhao.apps.Util.ThreadUtils.general.ThreadUtil;
+import com.yizhao.apps.Util.ThreadUtils.threadsignaling.MyWaitNotify;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -80,6 +81,11 @@ import java.util.concurrent.TimeUnit;
 public class BackfillMain {
     static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
+    private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
+
+    static{
+        mMyWaitNotify.doWait();
+    }
 
     /**
      * @param argv
@@ -282,5 +288,9 @@ public class BackfillMain {
         BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
         threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
+    }
+
+    public static MyWaitNotify getmMyWaitNotify() {
+        return mMyWaitNotify;
     }
 }
