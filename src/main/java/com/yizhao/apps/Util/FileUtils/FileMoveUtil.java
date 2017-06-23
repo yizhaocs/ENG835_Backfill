@@ -27,7 +27,7 @@ public class FileMoveUtil {
      * @param toDirectory
      */
     public static void moveFilesUnderDir(String rootPath, final String fileEndWith, File toDirectory) throws IOException {
-        File[] files = GetAllFilesInDir.getAllFilesInDir(rootPath, fileEndWith);
+        File[] files = DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith);
         for(File f: files){
             moveFile(f, toDirectory);
         }

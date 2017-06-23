@@ -6,7 +6,7 @@ import java.io.FileFilter;
 /**
  * Created by yzhao on 6/22/17.
  */
-public class GetAllFilesInDir {
+public class DirGetAllFiles {
     public static void main(String[] args){
 
         System.out.println("fileEndWith is .jpg");
