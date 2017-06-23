@@ -14,6 +14,7 @@ import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
 import com.yizhao.apps.Util.ThreadUtils.general.ThreadUtil;
 import com.yizhao.apps.Util.ThreadUtils.threadsignaling.MyWaitNotify;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/012017/ /workplace/yzhao/netezzaFiles/apac/hotelFiles/012017 012017 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/022017/ /workplace/yzhao/netezzaFiles/apac/hotelFiles/022017 022017 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/apac/hotelFiles/032017/ /workplace/yzhao/netezzaFiles/apac/hotelFiles/032017 032017 hotel
- *
+ *         <p>
  *         priceline
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/flightFiles/042016/ /workplace/yzhao/netezzaFiles/priceline/flightFiles/042016 042016 flight
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/flightFiles/052016/ /workplace/yzhao/netezzaFiles/priceline/flightFiles/052016 052016 flight
@@ -56,7 +57,7 @@ import java.util.concurrent.TimeUnit;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/flightFiles/012017/ /workplace/yzhao/netezzaFiles/priceline/flightFiles/012017 012017 flight
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/flightFiles/022017/ /workplace/yzhao/netezzaFiles/priceline/flightFiles/022017 022017 flight
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/flightFiles/032017/ /workplace/yzhao/netezzaFiles/priceline/flightFiles/032017 032017 flight
- *
+ *         <p>
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/042016/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/042016 042016 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/052016/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/052016 052016 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/062016/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/062016 062016 hotel
@@ -69,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/012017/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/012017 012017 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/022017/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/022017 022017 hotel
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar convert /workplace/yzhao/googleFiles/priceline/hotelFiles/032017/ /workplace/yzhao/netezzaFiles/priceline/hotelFiles/032017 032017 hotel
- *
+ *         <p>
  *         <p>
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac 2016-12 2017-03
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d eng759_backfill_apac  2016-12
@@ -80,10 +81,10 @@ import java.util.concurrent.TimeUnit;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d ENG759_BACKFILL_PRICELINE 2016-04 2017-03
  */
 public class BackfillController {
-    private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
+    private static final Logger log = Logger.getLogger(BackfillController.class);
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
-
+    private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     /**
      * for general
      */
@@ -106,6 +107,116 @@ public class BackfillController {
     private String type = null; // hotel or flight
     private String partition = null;
 
+    /**
+     * @param argv
+     */
+    public static void main(String[] argv) {
+
+    }
+
+    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
+
+
+        // Step 1 - dumpEkvrawFromNetezza
+        log.info("------------Executing Step 1------------");
+        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
+
+        // Step 2 - processEkvrawToGenerateFastrackFile
+        log.info("------------Executing Step 2------------");
+        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+
+        // Step 3 - move fastrack file to udcuv2 inbox
+        log.info("------------Executing Step 3------------");
+        File file = new File(fastrackFileOutputPath);
+        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
+        FileMoveUtil.moveFile(file, toDirectory);
+
+        // Step 4 - make sure there is no files in following dirs
+        log.info("------------Executing Step 4------------");
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+
+        // Step 5 - to know the udcuv2 finish up processing the file
+        log.info("------------Executing Step 5------------");
+        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+
+        // Step 6 - move hotel files
+        log.info("------------Executing Step 6------------");
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
+
+        // Step 7 - move flight files
+        log.info("------------Executing Step 7------------");
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+
+        // Step 8 - convert google hotel file to Netezza file
+        log.info("------------Executing Step 8------------");
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+
+        // Step 9 - convert google flight file to Netezza file
+        log.info("------------Executing Step 9------------");
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+
+
+    }
+
+    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+        // true then partition by date, false then partition by reminder of event_id,
+        if (partition == null) {
+            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+        } else {
+            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
+        }
+    }
+
+    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName) {
+        log.info("done with ekv raws to CSV file \n");
+        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
+        String timeStamp = null;
+
+        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        log.info("done with CSV file to fastrack file\n");
+        File f = new File(csvFileOutputPath);
+        if (FileDeleteUtil.deleteFile(f) == 1) {
+            log.info(csvFileOutputPath + " has deleted" + "\n");
+        } else {
+            log.info(csvFileOutputPath + " has failed to delete" + "\n");
+        }
+    }
+
+    private static void dirCleanThread(String fileSourceInput) {
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
+    }
+
+    private static void detectUdcuv2Finish(String fileSourceInput) {
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
+    }
+
+    public static MyWaitNotify getmMyWaitNotify() {
+        return mMyWaitNotify;
+    }
+
     public String getMode() {
         return mode;
     }
@@ -121,7 +232,6 @@ public class BackfillController {
     public void setOption(String option) {
         this.option = option;
     }
-
 
     public String getTable() {
         return table;
@@ -187,183 +297,180 @@ public class BackfillController {
         this.partition = partition;
     }
 
-    /**
-     * @param argv
-     */
-    public static void main(String[] argv) {
-
-    }
-
-    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
-        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
-        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
-
-
-        // Step 1 - dumpEkvrawFromNetezza
-        System.out.println("------------Executing Step 1------------");
-        dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
-
-        // Step 2 - processEkvrawToGenerateFastrackFile
-        System.out.println("------------Executing Step 2------------");
-        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
-
-        // Step 3 - move fastrack file to udcuv2 inbox
-        System.out.println("------------Executing Step 3------------");
-        File file = new File(fastrackFileOutputPath);
-        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
-        FileMoveUtil.moveFile(file, toDirectory);
-
-        // Step 4 - make sure there is no files in following dirs
-        System.out.println("------------Executing Step 4------------");
-        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
-        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
-
-        // Step 5 - to know the udcuv2 finish up processing the file
-        System.out.println("------------Executing Step 5------------");
-        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
-
-        // Step 6 - move hotel files
-        System.out.println("------------Executing Step 6------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File(processedGoogleCloudHotelFilePath));
-
-        // Step 7 - move flight files
-        System.out.println("------------Executing Step 7------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error",".csv", new File(processedGoogleCloudFlightFilePath));
-
-        // Step 8 - convert google hotel file to Netezza file
-        System.out.println("------------Executing Step 8------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
-
-        // Step 9 - convert google flight file to Netezza file
-        System.out.println("------------Executing Step 9------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
-
-
-    }
-
-    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
-        // true then partition by date, false then partition by reminder of event_id,
-        if(partition == null) {
-            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
-        }else {
-            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
-        }
-    }
-
-
-    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName){
-        System.out.println("done with ekv raws to CSV file \n");
-        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-        String timeStamp = null;
-
-        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
-        System.out.println("done with CSV file to fastrack file\n");
-        File f = new File(csvFileOutputPath);
-        if (FileDeleteUtil.deleteFile(f) == 1) {
-            System.out.println(csvFileOutputPath + " has deleted" + "\n");
-        } else {
-            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-        }
-    }
-
-
-    private static void dirCleanThread(String fileSourceInput){
-        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
-        File inputDir = new File(fileSourceInput);
-        File outputDir = null;
-
-        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
-        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
-    }
-
-    private static void detectUdcuv2Finish(String fileSourceInput){
-        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
-        File inputDir = new File(fileSourceInput);
-        File outputDir = null;
-
-        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
-        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
-    }
-
-    public static MyWaitNotify getmMyWaitNotify() {
-        return mMyWaitNotify;
-    }
-
     public void init() {
 
-        if(mode == null){
+        if (mode == null) {
             return;
         }
 
         try {
             if (mode.equals("convert")) {
-                if(inputPath == null){
+                if (inputPath == null) {
+                    log.error("inputPath is null");
                     return;
                 }
 
-                if(outPutPath == null){
+                if (outPutPath == null) {
+                    log.error("outPutPath is null");
                     return;
                 }
 
-                if(monthYear == null){
+                if (monthYear == null) {
+                    log.error("monthYear is null");
                     return;
                 }
 
-                if(type == null){
+                if (type == null) {
+                    log.error("type is null");
                     return;
                 }
 
-                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_"  + type + "_001.csv", type);
+                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
             } else if (mode.equals("dump")) {
-                if(option == null){
+                if (option == null) {
+                    log.error("option is null");
                     return;
                 }
 
-                if(option.equals("d")){
+                if (option.equals("d")) {
                     if (startDate == null) {
-                        System.out.println("argument 2 startYearDate is missing");
+                        log.error("startDate is null");
                         return;
                     }
                 } else if (option.equals("r")) {
-                    if(partition == null){
+                    if (partition == null) {
                         return;
                     }
                 }
 
-                String partition = null;
+                if (table == null) {
+                    log.error("table is null");
+                    return;
+                }
+
                 String startYear = null;
                 String startYearMonth = null;
                 String endYear = null;
                 String endYearMonth = null;
-                    if (option.equals("d")) {
-                        if (startDate != null) {
-                            String[] startYearDateStr = startDate.split("-");
-                            startYear = startYearDateStr[0];
-                            startYearMonth = startYearDateStr[1];
-                        }
-
-                        if (endDate != null) {
-                            String[] endYearDateStr = endDate.split("-");
-                            endYear = endYearDateStr[0];
-                            endYearMonth = endYearDateStr[1];
-                        }
-
-
+                if (option.equals("d")) {
+                    if (startDate != null) {
+                        String[] startYearDateStr = startDate.split("-");
+                        startYear = startYearDateStr[0];
+                        startYearMonth = startYearDateStr[1];
                     }
 
-                if (table == null) {
-                    System.out.println("argument 1 taleName is missing");
+                    if (endDate != null) {
+                        String[] endYearDateStr = endDate.split("-");
+                        endYear = endYearDateStr[0];
+                        endYearMonth = endYearDateStr[1];
+                    }
+
+
+                }
+
+
+
+
+                String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
+                String fastrackFileOutputPath = DEFAULT_FILE_PATH;
+
+
+                /**
+                 * hostName has startwith properties:
+                 *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
+                 */
+
+                String CurrentHostName = InetAddress.getLocalHost().getHostName();
+                String fileHostName = null;
+                // hdu.include.only.sources in common.properties
+                if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
+                    fileHostName = "qa1-ps1-lax1";
+                } else {
+                    fileHostName = "ps";
+                }
+
+                if (option.equals("d")) {
+                    log.info("startYear:" + startYear);
+                    log.info("startYearMonth:" + startYearMonth);
+                    log.info("endYear:" + endYear);
+                    log.info("endYearMonth:" + endYearMonth);
+
+
+                    if (endDate != null) {
+                        int count = 0;
+                        String curYear = startYear;
+                        String curYearMonth = startYearMonth;
+                        while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                            runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+
+                            count++;
+                            if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
+                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
+                            } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
+                                curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
+                                curYearMonth = "01";
+                            } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
+                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
+                            } else {
+                                log.info("curYear and curYearMonth are same as endYear and endYearMonth");
+                            }
+                        }
+
+                        // run for the final month
+                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
+                    } else {
+                        // only get one month
+                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, startYear, startYearMonth);
+                    }
+                } else if (option.equals("r")) {
+                    if (partition == null) {
+                        int i = 0;
+                        while (i < 10) {
+                            dumpEkvrawFromNetezza(table, csvFileOutputPath, String.valueOf(i), null, null);
+                            i++;
+                        }
+                    } else {
+                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
+                    }
+                }
+            } else if(mode.equals("backfill")){
+                if (option == null) {
+                    log.error("option is null");
                     return;
+                }
+
+                if (option.equals("d")) {
+                    if (startDate == null) {
+                        log.error("startDate is null");
+                        return;
+                    }
+                } else if (option.equals("r")) {
+                    if (partition == null) {
+                        return;
+                    }
+                }
+
+                if (table == null) {
+                    log.error("table is null");
+                    return;
+                }
+
+                String startYear = null;
+                String startYearMonth = null;
+                String endYear = null;
+                String endYearMonth = null;
+                if (option.equals("d")) {
+                    if (startDate != null) {
+                        String[] startYearDateStr = startDate.split("-");
+                        startYear = startYearDateStr[0];
+                        startYearMonth = startYearDateStr[1];
+                    }
+
+                    if (endDate != null) {
+                        String[] endYearDateStr = endDate.split("-");
+                        endYear = endYearDateStr[0];
+                        endYearMonth = endYearDateStr[1];
+                    }
                 }
 
 
@@ -386,10 +493,10 @@ public class BackfillController {
                 }
 
                 if (option.equals("d")) {
-                    System.out.println("startYear:" + startYear);
-                    System.out.println("startYearMonth:" + startYearMonth);
-                    System.out.println("endYear:" + endYear);
-                    System.out.println("endYearMonth:" + endYearMonth);
+                    log.info("startYear:" + startYear);
+                    log.info("startYearMonth:" + startYearMonth);
+                    log.info("endYear:" + endYear);
+                    log.info("endYearMonth:" + endYearMonth);
 
 
                     if (endDate != null) {
@@ -408,7 +515,7 @@ public class BackfillController {
                             } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
                                 curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
                             } else {
-                                System.out.println("curYear and curYearMonth are same as endYear and endYearMonth");
+                                log.info("curYear and curYearMonth are same as endYear and endYearMonth");
                             }
                         }
 
@@ -422,16 +529,16 @@ public class BackfillController {
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
-                            runBackfill(table, csvFileOutputPath,  String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
+                            runBackfill(table, csvFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
                             i++;
                         }
                     } else {
-                        runBackfill(table, csvFileOutputPath,  partition, null, null, fastrackFileOutputPath, fileHostName);
+                        runBackfill(table, csvFileOutputPath, partition, null, null, fastrackFileOutputPath, fileHostName);
                     }
                 }
             }
         } catch (Exception e) {
-            System.out.println("Exception in Main:" + "\n");
+            log.error("Exception in Main:" + "\n");
             e.printStackTrace();
         }
 

@@ -1,6 +1,7 @@
 package com.yizhao.apps.Converter;
 
 import com.yizhao.apps.Util.DateUtil;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -68,6 +69,7 @@ import java.util.Scanner;
  * event_id,cookie_id,dp_id,vertical,activity_group,activity_type,event_ts,departure_date,return_date,origin_airport,destination_airport,air_carrier,cabin_class,cabin_class_group,currency_type,number_of_travelers,trip_duration,booked_date,airfare,page,user_id,location_id"
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
+    private static final Logger log = Logger.getLogger(GoogleCloudFileToNetezzaFileConvertor.class);
     public static void main(String[] args) {
         String todayDate = DateUtil.getCurrentDate("yyyyMMdd");
         process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "hotel");
@@ -90,17 +92,17 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         FileWriter out = null;
         try {
             out = new FileWriter(outputPath);
-            System.out.println("GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput.listOfFiles.length:" + listOfFiles.length);
+            log.info("GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput.listOfFiles.length:" + listOfFiles.length);
             for (int i = 0; i < listOfFiles.length; i++) {
                 File file = listOfFiles[i];
-                System.out.println("begin of converting file:" + file.getName());
+                log.info("begin of converting file:" + file.getName());
                 if (file.isFile() && file.getName().endsWith(".csv")) {
                     int count = readFile(out, file, type);
-                    System.out.println("end of converting file with total converted count:" + count + "\n");
+                    log.info("end of converting file with total converted count:" + count + "\n");
                 }
             }
         } catch (Exception e) {
-            System.out.println("failed in GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput");
+            log.info("failed in GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput");
         } finally {
             if (out != null) {
                 try {
@@ -127,7 +129,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 count++;
             }
         } catch (Exception e) {
-            System.out.println("failed to parseJason:" + line);
+            log.info("failed to parseJason:" + line);
         } finally {
             if (s != null) {
                 s.close();

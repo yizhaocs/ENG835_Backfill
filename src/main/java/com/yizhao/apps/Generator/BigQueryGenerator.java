@@ -1,6 +1,7 @@
 package com.yizhao.apps.Generator;
 
 import com.yizhao.apps.Util.DateUtil;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
@@ -15,6 +16,7 @@ import java.util.Scanner;
  * Created by yzhao on 6/5/17.
  */
 public class BigQueryGenerator {
+    private static final Logger log = Logger.getLogger(BigQueryGenerator.class);
     public static void main(String[] args){
         generate("/Users/yzhao/Desktop/20170602160034nDWBzwnegroEJb0.20170602160034.1496444434946.Yi-Zhao-local-lax1.concat.csv", "/Users/yzhao/Desktop/big_query_generator.csv");
     }

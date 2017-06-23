@@ -4,6 +4,7 @@ package com.yizhao.apps.Scanner.FileProcessor;
 import com.yizhao.apps.BackfillController;
 import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.concurrent.BlockingQueue;
  */
 
 public class FileProcessor implements Runnable {
+    private static final Logger log = Logger.getLogger(FileProcessor.class);
     private final BlockingQueue<File> queue;
     private final File outputDir;
     private final String command;
@@ -56,7 +58,7 @@ public class FileProcessor implements Runnable {
         // do something with the file...
         try {
             FileMoveUtil.moveFile(file, outputDir);
-            System.out.println("File: " + file.getName() + "  has moved to " + outputDir.getName());
+            log.info("File: " + file.getName() + "  has moved to " + outputDir.getName());
         }catch(IOException e){
             System.out.println();
             e.printStackTrace();

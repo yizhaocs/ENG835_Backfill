@@ -1,6 +1,7 @@
 package com.yizhao.apps.Generator;
 
 import com.yizhao.apps.Model.FastrackFileDao;
+import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -13,6 +14,7 @@ import java.util.Map;
  * @author YI ZHAO
  */
 public class FastrackFileGenerator {
+    private static final Logger log = Logger.getLogger(FastrackFileGenerator.class);
 
     /**
      * ckvraw|timestamp(seconds)|cookie_id|key1=value1&key2=value2&...keyN=valueN|event_id|dp_id|dp_user_id|location_id|referer_url|domain|user_agent
@@ -34,18 +36,18 @@ public class FastrackFileGenerator {
             }
 
         } catch (FileNotFoundException e) {
-            System.out.println("Caught FileNotFoundException: " + e.getMessage());
+            log.error("Caught FileNotFoundException: " + e.getMessage());
         } catch (IOException e) {
-            System.out.println("Caught IOException: " + e.getMessage());
+            log.error("Caught IOException: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Caught Exception: " + e.getMessage());
+            log.error("Caught Exception: " + e.getMessage());
         } finally {
             try {
                 if (out != null) {
                     out.close();
                 }
             }catch (IOException e){
-                System.out.println("Caught IOException: " + e.getMessage());
+                log.error("Caught IOException: " + e.getMessage());
             }
         }
     }

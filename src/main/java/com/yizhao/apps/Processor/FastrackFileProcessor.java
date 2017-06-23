@@ -3,6 +3,7 @@ package com.yizhao.apps.Processor;
 import com.yizhao.apps.Model.FastrackFileDao;
 import com.yizhao.apps.Util.DateUtil;
 import org.apache.commons.lang3.text.StrTokenizer;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +35,7 @@ import java.util.Scanner;
  * @author YI ZHAO
  */
 public class FastrackFileProcessor {
+    private static final Logger log = Logger.getLogger(FastrackFileProcessor.class);
     private static final StrTokenizer st = StrTokenizer.getCSVInstance();
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     static {
@@ -56,7 +58,7 @@ public class FastrackFileProcessor {
                 String line = s.nextLine();
                 String[] str = st.reset(line).getTokenArray();
                 if (str.length != 7) {
-                    System.out.println("str.length != 7 at the line:" + line);
+                    log.info("str.length != 7 at the line:" + line);
                     continue;
                 }
                 String event_id = str[0];
@@ -77,8 +79,8 @@ public class FastrackFileProcessor {
                     try{
                         date = dateFormatTmp.parse(modification_ts);
                     }catch(Exception e2){
-                        System.out.println("error data format event_id:" + event_id + " ,modification_ts:" + modification_ts + "\n");
-                        System.out.println("Exception in FastrackFileProcessor:" + "\n");
+                        log.error("error data format event_id:" + event_id + " ,modification_ts:" + modification_ts + "\n");
+                        log.error("Exception in FastrackFileProcessor:" + "\n");
                         e2.printStackTrace();
                     }
                 }
@@ -116,16 +118,16 @@ public class FastrackFileProcessor {
             out.write(toCKVRAW(preFastrackFileDao));
             rowCount++;
         } catch (FileNotFoundException e) {
-            System.out.println("Exception in FastrackFileProcessor:" + "\n");
+            log.error("Exception in FastrackFileProcessor:" + "\n");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("Exception in FastrackFileProcessor:" + "\n");
+            log.error("Exception in FastrackFileProcessor:" + "\n");
             e.printStackTrace();
         } catch (Exception e) {
-            System.out.println("Exception in FastrackFileProcessor:" + "\n");
+            log.error("Exception in FastrackFileProcessor:" + "\n");
             e.printStackTrace();
         } finally {
-            System.out.print("Total row generated for fastrack is:" + rowCount + "\n");
+            log.info("Total row generated for fastrack is:" + rowCount + "\n");
             if (s != null) {
                 s.close();
             }
@@ -135,7 +137,7 @@ public class FastrackFileProcessor {
                     out.close();
                 }
             }catch (IOException e){
-                System.out.println("Caught IOException: " + e.getMessage());
+                log.error("Caught IOException: " + e.getMessage());
             }
         }
     }
