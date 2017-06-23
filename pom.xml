@@ -120,11 +120,11 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <warName>backfill</warName>
-                    <webXml>web/WEB-INF/web.xml</webXml>
+                    <webXml>WEB-INF/web.xml</webXml>
                     <webResources>
                         <resource>
-                            <directory>web/WEB-INF</directory>
-                            <targetPath>web/WEB-INF</targetPath>
+                            <directory>WEB-INF</directory>
+                            <targetPath>WEB-INF</targetPath>
                             <filtering>false</filtering>
                             <includes>
                                 <include>*.xml</include>
