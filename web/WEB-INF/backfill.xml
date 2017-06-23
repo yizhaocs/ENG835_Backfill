@@ -11,5 +11,9 @@
 
     <bean id="udcuController" class="com.yizhao.apps.BackfillController"
           init-method="init" destroy-method="destroy">
+
+        <property name="table" value="${table}" />
+        <property name="startDate" value="${startDate}" />
+        <property name="endDate" value="${endDate}" />
     </bean>
 </beans>

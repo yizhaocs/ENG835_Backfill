@@ -80,14 +80,150 @@ import java.util.concurrent.TimeUnit;
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d ENG759_BACKFILL_PRICELINE 2016-04 2017-03
  */
 public class BackfillController {
-    static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
+    private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
+    private String table = null;
+    private String startDate = null;
+    private String endDate = null;
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
     /**
      * @param argv
      */
     public static void main(String[] argv) {
+
+    }
+
+    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
+        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
+
+
+        // Step 1 - dumpEkvrawFromNetezza
+        System.out.println("------------Executing Step 1------------");
+        dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
+
+        // Step 2 - processEkvrawToGenerateFastrackFile
+        System.out.println("------------Executing Step 2------------");
+        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+
+        // Step 3 - move fastrack file to udcuv2 inbox
+        System.out.println("------------Executing Step 3------------");
+        File file = new File(fastrackFileOutputPath);
+        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
+        FileMoveUtil.moveFile(file, toDirectory);
+
+        // Step 4 - make sure there is no files in following dirs
+        System.out.println("------------Executing Step 4------------");
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+
+        // Step 5 - to know the udcuv2 finish up processing the file
+        System.out.println("------------Executing Step 5------------");
+        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+
+        // Step 6 - move hotel files
+        System.out.println("------------Executing Step 6------------");
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File(processedGoogleCloudHotelFilePath));
+
+        // Step 7 - move flight files
+        System.out.println("------------Executing Step 7------------");
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error",".csv", new File(processedGoogleCloudFlightFilePath));
+
+        // Step 8 - convert google hotel file to Netezza file
+        System.out.println("------------Executing Step 8------------");
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+
+        // Step 9 - convert google flight file to Netezza file
+        System.out.println("------------Executing Step 9------------");
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+
+
+    }
+
+    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+        // true then partition by date, false then partition by reminder of event_id,
+        if(partition == null) {
+            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+        }else {
+            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
+        }
+    }
+
+
+    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName){
+        System.out.println("done with ekv raws to CSV file \n");
+        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
+        String timeStamp = null;
+
+        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        System.out.println("done with CSV file to fastrack file\n");
+        File f = new File(csvFileOutputPath);
+        if (FileDeleteUtil.deleteFile(f) == 1) {
+            System.out.println(csvFileOutputPath + " has deleted" + "\n");
+        } else {
+            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
+        }
+    }
+
+
+    private static void dirCleanThread(String fileSourceInput){
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
+    }
+
+    private static void detectUdcuv2Finish(String fileSourceInput){
+        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+        File inputDir = new File(fileSourceInput);
+        File outputDir = null;
+
+        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
+        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
+        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
+    }
+
+    public static MyWaitNotify getmMyWaitNotify() {
+        return mMyWaitNotify;
+    }
+
+    public void init() {
         String mode = null; // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
 
         try {
@@ -218,117 +354,7 @@ public class BackfillController {
 
     }
 
-    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
-        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
-        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
-
-
-        // Step 1 - dumpEkvrawFromNetezza
-        System.out.println("------------Executing Step 1------------");
-        dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
-
-        // Step 2 - processEkvrawToGenerateFastrackFile
-        System.out.println("------------Executing Step 2------------");
-        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
-
-        // Step 3 - move fastrack file to udcuv2 inbox
-        System.out.println("------------Executing Step 3------------");
-        File file = new File(fastrackFileOutputPath);
-        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
-        FileMoveUtil.moveFile(file, toDirectory);
-
-        // Step 4 - make sure there is no files in following dirs
-        System.out.println("------------Executing Step 4------------");
-        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
-        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
-
-        // Step 5 - to know the udcuv2 finish up processing the file
-        System.out.println("------------Executing Step 5------------");
-        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
-
-        // Step 6 - move hotel files
-        System.out.println("------------Executing Step 6------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File(processedGoogleCloudHotelFilePath));
-
-        // Step 7 - move flight files
-        System.out.println("------------Executing Step 7------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error",".csv", new File(processedGoogleCloudFlightFilePath));
-
-        // Step 8 - convert google hotel file to Netezza file
-        System.out.println("------------Executing Step 8------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
-
-        // Step 9 - convert google flight file to Netezza file
-        System.out.println("------------Executing Step 9------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
-
-
-    }
-
-    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
-        // true then partition by date, false then partition by reminder of event_id,
-        if(partition == null) {
-            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
-        }else {
-            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
-        }
-    }
-
-
-    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName){
-        System.out.println("done with ekv raws to CSV file \n");
-        String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-        String timeStamp = null;
-
-        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
-        System.out.println("done with CSV file to fastrack file\n");
-        File f = new File(csvFileOutputPath);
-        if (FileDeleteUtil.deleteFile(f) == 1) {
-            System.out.println(csvFileOutputPath + " has deleted" + "\n");
-        } else {
-            System.out.println(csvFileOutputPath + " has failed to delete" + "\n");
-        }
-    }
-
-
-    private static void dirCleanThread(String fileSourceInput){
-        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
-        File inputDir = new File(fileSourceInput);
-        File outputDir = null;
-
-        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
-        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
-    }
-
-    private static void detectUdcuv2Finish(String fileSourceInput){
-        ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
-        File inputDir = new File(fileSourceInput);
-        File outputDir = null;
-
-        BlockingQueue blockingQueue = new ArrayBlockingQueue(5);
-        threadPool.execute(new FileCrawler(blockingQueue, new fastrackFileFilter(), inputDir));
-        threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
-    }
-
-    public static MyWaitNotify getmMyWaitNotify() {
-        return mMyWaitNotify;
-    }
-
-    public void init() {
-
-    }
-
     public void destroy() {
         ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
     }
-
 }
