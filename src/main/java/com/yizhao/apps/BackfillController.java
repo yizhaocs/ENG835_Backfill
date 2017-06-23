@@ -79,7 +79,7 @@ import java.util.concurrent.TimeUnit;
  *         <p>
  *         /usr/java/jdk/bin/java -jar Backfill-jar-with-dependencies.jar dump d ENG759_BACKFILL_PRICELINE 2016-04 2017-03
  */
-public class BackfillMain {
+public class BackfillController {
     static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
@@ -270,9 +270,7 @@ public class BackfillMain {
         System.out.println("------------Executing Step 9------------");
         GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
 
-        // Step final - clean up all thread
-        System.out.println("------------Executing Step final------------");
-        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
+
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
@@ -324,4 +322,13 @@ public class BackfillMain {
     public static MyWaitNotify getmMyWaitNotify() {
         return mMyWaitNotify;
     }
+
+    public void init() {
+
+    }
+
+    public void destroy() {
+        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
+    }
+
 }

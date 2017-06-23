@@ -8,4 +8,8 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
 
+
+    <bean id="udcuController" class="com.yizhao.apps.BackfillController"
+          init-method="init" destroy-method="destroy">
+    </bean>
 </beans>
