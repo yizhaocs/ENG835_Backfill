@@ -70,13 +70,14 @@ import java.util.Scanner;
  */
 public class GoogleCloudFileToNetezzaFileConvertor {
     private static final Logger log = Logger.getLogger(GoogleCloudFileToNetezzaFileConvertor.class);
-    public static void main(String[] args) {
+
+    public void main(String[] args) {
         String todayDate = DateUtil.getCurrentDate("yyyyMMdd");
         process("/opt/opinmind/var/google/ekvhotel/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_hotel_all_netezza-" + todayDate + "_hotel_001.csv", "hotel");
         process("/opt/opinmind/var/google/ekvflight/concat", "/home/yzhao/ENG835/googleToNetezzaFiles/ekv_flight_all_netezza-" + todayDate + "_flight_001.csv", "flight");
     }
 
-    public static void process(String inputDirPath, String outputPath, String type) {
+    public void process(String inputDirPath, String outputPath, String type) {
         readDirAndWriteToOutput(inputDirPath, outputPath, type);
     }
 
@@ -86,7 +87,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
      *
      * @param inputDirPath
      */
-    public static void readDirAndWriteToOutput(String inputDirPath, String outputPath, String type) {
+    public void readDirAndWriteToOutput(String inputDirPath, String outputPath, String type) {
         File folder = new File(inputDirPath);
         File[] listOfFiles = folder.listFiles();
         FileWriter out = null;
@@ -114,7 +115,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         }
     }
 
-    public static int readFile(FileWriter out, File f, String type) {
+    public int readFile(FileWriter out, File f, String type) {
         int count = 0;
 
         Scanner s = null;
@@ -139,7 +140,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
     }
 
 
-    public static String parseJasonAndConvertToNetezzaFormat(String line, String type) {
+    public String parseJasonAndConvertToNetezzaFormat(String line, String type) {
         String result = null;
         String NULL = "";
         String dw_modification_ts = DateUtil.getCurrentDate("yyyy-MM-dd HH:mm:ss");
@@ -298,4 +299,12 @@ public class GoogleCloudFileToNetezzaFileConvertor {
         return result;
     }
 
+    public void init() {
+
+    }
+
+
+    public void destroy() {
+
+    }
 }

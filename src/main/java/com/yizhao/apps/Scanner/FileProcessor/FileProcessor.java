@@ -29,10 +29,10 @@ public class FileProcessor implements Runnable {
     public void run() {
         try {
             while (true) {
-                if(command.equals("delete")){
+                if (command.equals("delete")) {
                     deleteFile(queue.take());
-                }else if(command.equals("foundNewFileInDir")){
-                    if(queue.size() != 0){
+                } else if (command.equals("foundNewFileInDir")) {
+                    if (queue.size() != 0) {
                         BackfillController.getmMyWaitNotify().doNotify();
                         FileDeleteUtil.deleteFile(queue.take());
                     }
@@ -59,7 +59,7 @@ public class FileProcessor implements Runnable {
         try {
             FileMoveUtil.moveFile(file, outputDir);
             log.info("File: " + file.getName() + "  has moved to " + outputDir.getName());
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println();
             e.printStackTrace();
         }

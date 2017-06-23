@@ -12,12 +12,12 @@ import java.sql.Statement;
  */
 public class NetezzaConnector {
     private static final Logger log = Logger.getLogger(NetezzaConnector.class);
-    private static final String NETEZZA_DB_DRIVER = "org.netezza.Driver";
-    private static final String DB_CONNECTION = "jdbc:netezza://nz-vip-nym1:5480/opinmind_dev";
-    private static final String DB_USER = "opinmind_dev_admin";
-    private static final String DB_PASSWORD = "29JWmn2e";
+    private final String NETEZZA_DB_DRIVER = "org.netezza.Driver";
+    private final String DB_CONNECTION = "jdbc:netezza://nz-vip-nym1:5480/opinmind_dev";
+    private final String DB_USER = "opinmind_dev_admin";
+    private final String DB_PASSWORD = "29JWmn2e";
 
-    public static void dataToCsvPartitionByMod(String table, String csvFileOutputPath, String partition) throws SQLException {
+    public void dataToCsvPartitionByMod(String table, String csvFileOutputPath, String partition) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
@@ -56,7 +56,7 @@ public class NetezzaConnector {
         }
     }
 
-    public static void dataToCsvPartitionByYearMonth(String table, String csvFileOutputPath, String year, String month) throws SQLException {
+    public void dataToCsvPartitionByYearMonth(String table, String csvFileOutputPath, String year, String month) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
@@ -97,18 +97,18 @@ public class NetezzaConnector {
         }
     }
 
-    public static void generateBackFillTableForApac(String dpIds, String startDate, String endDate) throws SQLException {
-        if(dpIds == null){
+    public void generateBackFillTableForApac(String dpIds, String startDate, String endDate) throws SQLException {
+        if (dpIds == null) {
             log.error("dpIds is missing in NetezzaConnector.generateBackFillTable");
             return;
         }
 
-        if(startDate == null){
+        if (startDate == null) {
             log.error("startDate is missing in NetezzaConnector.generateBackFillTable");
             return;
         }
 
-        if(endDate == null){
+        if (endDate == null) {
             log.error("endDate is missing in NetezzaConnector.generateBackFillTable");
             return;
         }
@@ -153,7 +153,7 @@ public class NetezzaConnector {
         }
     }
 
-    public static Connection getDBConnection() {
+    public Connection getDBConnection() {
         Connection dbConnection = null;
 
         try {
@@ -177,7 +177,7 @@ public class NetezzaConnector {
     }
 
 
-    public static void connectionTesting() {
+    public void connectionTesting() {
         try {
             Class.forName(NETEZZA_DB_DRIVER);
         } catch (ClassNotFoundException e) {
@@ -202,5 +202,14 @@ public class NetezzaConnector {
         } else {
             log.info("Failed to make connection to Netezza database!");
         }
+    }
+
+    public void init() {
+
+    }
+
+
+    public void destroy() {
+
     }
 }

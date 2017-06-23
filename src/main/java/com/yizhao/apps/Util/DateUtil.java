@@ -7,11 +7,11 @@ import java.util.Date;
  * Created by yzhao on 5/30/17.
  */
 public class DateUtil {
-    public static Long dateToUnixTime(Date date){
-        if(date == null){
+    public static Long dateToUnixTime(Date date) {
+        if (date == null) {
             return null;
         }
-        return date.getTime()/1000;
+        return date.getTime() / 1000;
     }
 
     public static String getCurrentDate(String format) {
@@ -20,8 +20,8 @@ public class DateUtil {
         return dateFormat.format(date).toString();
     }
 
-    public static long getCurrentTimeInUnixTimestamp(){
+    public static long getCurrentTimeInUnixTimestamp() {
         Date d = new Date();
-        return d.getTime()/1000;
+        return d.getTime() / 1000;
     }
 }

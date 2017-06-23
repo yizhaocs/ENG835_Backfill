@@ -23,13 +23,13 @@ public class FastrackFileGenerator {
      * @return
      */
     @Deprecated
-    public static void execute(Map<String, FastrackFileDao> eventIdToData, String fastrackFileOutputPath) {
+    public void execute(Map<String, FastrackFileDao> eventIdToData, String fastrackFileOutputPath) {
         FileWriter out = null;
         try {
             // When you're working with FileWriter you don't have to create the file first,
             // you can simply start writing to it.
             out = new FileWriter(fastrackFileOutputPath);
-            for(String event_id: eventIdToData.keySet()){
+            for (String event_id : eventIdToData.keySet()) {
                 FastrackFileDao mFastrackFileDao = eventIdToData.get(event_id);
                 out.write(toCKVRAW(mFastrackFileDao));
                 out.write("\n");
@@ -46,14 +46,14 @@ public class FastrackFileGenerator {
                 if (out != null) {
                     out.close();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 log.error("Caught IOException: " + e.getMessage());
             }
         }
     }
 
-    private static String toCKVRAW(FastrackFileDao mFastrackFileDao){
-        return "ckvraw" + "|" + mFastrackFileDao.getModification_ts() + "|" + mFastrackFileDao.getCookie_id() + "|" + mFastrackFileDao.getKvPair() + "|" + mFastrackFileDao.getEvent_id() + "|" + mFastrackFileDao.getDp_id() +  "|" + "null" + "|" + mFastrackFileDao.getLocation_id() +  "|" + "null" +  "|" + "null" +  "|" + "null";
+    private String toCKVRAW(FastrackFileDao mFastrackFileDao) {
+        return "ckvraw" + "|" + mFastrackFileDao.getModification_ts() + "|" + mFastrackFileDao.getCookie_id() + "|" + mFastrackFileDao.getKvPair() + "|" + mFastrackFileDao.getEvent_id() + "|" + mFastrackFileDao.getDp_id() + "|" + "null" + "|" + mFastrackFileDao.getLocation_id() + "|" + "null" + "|" + "null" + "|" + "null";
 
     }
 }

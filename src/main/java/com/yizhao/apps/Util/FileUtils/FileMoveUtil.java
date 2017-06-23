@@ -11,24 +11,23 @@ import java.io.IOException;
 public class FileMoveUtil {
     private static final Logger logger = Logger.getLogger(FileMoveUtil.class);
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         File from = new File("/Users/yzhao/Desktop/test.txt");
         File to = new File("/Users/yzhao/Desktop/test2.txt");
         doMoveFile(from, to, false);
 
-        moveFilesUnderDir("/Users/yzhao/Desktop/input",".jpg", new File("/Users/yzhao/Desktop/output"));
+        moveFilesUnderDir("/Users/yzhao/Desktop/input", ".jpg", new File("/Users/yzhao/Desktop/output"));
     }
 
 
     /**
-     *
      * @param rootPath
      * @param fileEndWith
      * @param toDirectory
      */
     public static void moveFilesUnderDir(String rootPath, final String fileEndWith, File toDirectory) throws IOException {
         File[] files = DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith);
-        for(File f: files){
+        for (File f : files) {
             moveFile(f, toDirectory);
         }
     }
@@ -60,8 +59,8 @@ public class FileMoveUtil {
     }
 
     public static void doMoveFile(File fromFile, File toFile, boolean overwrite) throws IOException {
-        if( logger.isDebugEnabled() ){
-            logger.debug( "START moving file " + fromFile + " to " + toFile );
+        if (logger.isDebugEnabled()) {
+            logger.debug("START moving file " + fromFile + " to " + toFile);
         }
 
         if (toFile.equals(fromFile)) {
@@ -80,8 +79,8 @@ public class FileMoveUtil {
             throw new IOException("Could not move file " + fromFile + " to " + toFile);
         }
 
-        if( logger.isDebugEnabled() ){
-            logger.debug( "FINISH moving file " + fromFile + " to " + toFile );
+        if (logger.isDebugEnabled()) {
+            logger.debug("FINISH moving file " + fromFile + " to " + toFile);
         }
     }
 }

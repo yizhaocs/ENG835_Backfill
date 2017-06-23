@@ -12,9 +12,9 @@ public class ArgumentsUtil {
      * thrown respectively.
      *
      * @param objects a varargs list of arguments to be validated.
-     * @throws NullPointerException if a null object is passed as an argument.
+     * @throws NullPointerException     if a null object is passed as an argument.
      * @throws IllegalArgumentException if a zero-length {@link String} is passed
-     *           as an argument.
+     *                                  as an argument.
      */
     public static void validateMandatory(Object... objects) throws NullPointerException,
             IllegalArgumentException {
@@ -47,7 +47,7 @@ public class ArgumentsUtil {
 
     /**
      * Validate that the parameters are not null.
-     *
+     * <p>
      * Minor tweak from Menon's OpinmindUtil, to enforce non-null arguments only ( zero length strings are ok )
      *
      * @param objects a vararg list of arguments to be validated.
@@ -66,22 +66,22 @@ public class ArgumentsUtil {
     /**
      * Validate that the condition is true.
      * If not, throw IllegalArgumentException
-     *
+     * <p>
      * Used to validate params, e.g. x must be > 0
      *
      * @param condition a boolean
-     * @param error message ( optional )
+     * @param error     message ( optional )
      * @throws IllegalArgumentException if condition is not true
      */
-    public static void validateTrue( boolean condition, String msg )
+    public static void validateTrue(boolean condition, String msg)
             throws IllegalArgumentException {
-        if( !condition ){
-            throw new IllegalArgumentException( msg != null ? msg : "condition is false" );
+        if (!condition) {
+            throw new IllegalArgumentException(msg != null ? msg : "condition is false");
         }
     }
 
-    public static void validateTrue( boolean condition ){
-        validateTrue( condition, null );
+    public static void validateTrue(boolean condition) {
+        validateTrue(condition, null);
     }
 
 }

@@ -17,27 +17,28 @@ import java.util.concurrent.TimeUnit;
 public class ThreadUtil {
     private static final Logger logger = Logger.getLogger(ThreadUtil.class);
 
-    public static void stopAllThreads(Map<String, ExecutorService> threadPools, String serviceDescription, long waitTime, TimeUnit waitTimeUnit){
+    public static void stopAllThreads(Map<String, ExecutorService> threadPools, String serviceDescription, long waitTime, TimeUnit waitTimeUnit) {
         for (String poolName : threadPools.keySet()) {
-            ThreadUtil.forceShutdownAfterWaiting( threadPools.get(poolName),
-                    serviceDescription, waitTime, waitTimeUnit );
+            ThreadUtil.forceShutdownAfterWaiting(threadPools.get(poolName),
+                    serviceDescription, waitTime, waitTimeUnit);
         }
     }
 
 
     /**
      * ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
+     *
      * @param threadPools
      * @param threadName
      * @param daemon
      * @param threadPriority
      * @return
      */
-    public static ExecutorService newThread(Map<String, ExecutorService> threadPools, String threadName, boolean daemon, int threadPriority){
+    public static ExecutorService newThread(Map<String, ExecutorService> threadPools, String threadName, boolean daemon, int threadPriority) {
         ExecutorService threadPool = threadPools.get(threadName);
         if (threadPool == null) {
             BasicThreadFactory factory = new BasicThreadFactory.Builder()
-                    .namingPattern(threadName+"-%d")
+                    .namingPattern(threadName + "-%d")
 
                     .daemon(daemon)
                     .priority(threadPriority)

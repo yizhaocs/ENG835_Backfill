@@ -11,7 +11,7 @@ public class FastrackFileDao {
     private String location_id;
     private String modification_ts;
 
-    public FastrackFileDao(String event_id, String kvPair, String cookie_id, String dp_id, String location_id, String modification_ts){
+    public FastrackFileDao(String event_id, String kvPair, String cookie_id, String dp_id, String location_id, String modification_ts) {
         this.event_id = event_id;
         this.kvPair = kvPair;
         this.cookie_id = cookie_id;

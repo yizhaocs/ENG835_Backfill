@@ -9,8 +9,11 @@
 
 
 
-    <bean id="udcuController" class="com.yizhao.apps.BackfillController"
+    <bean id="backfillController" class="com.yizhao.apps.BackfillController"
           init-method="init" destroy-method="destroy">
+        <property name="googleCloudFileToNetezzaFileConvertor" ref="googleCloudFileToNetezzaFileConvertor" />
+        <property name="fastrackFileProcessor" ref="fastrackFileProcessor" />
+
         <!--for general-->
         <property name="mode" value="${mode}" />
 
@@ -27,4 +30,16 @@
         <property name="type" value="${type}" />
         <property name="partition" value="${partition}" />
     </bean>
+
+    <bean id="googleCloudFileToNetezzaFileConvertor" class="com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
+    </bean>
+
+    <bean id="fastrackFileProcessor" class="com.yizhao.apps.Processor.FastrackFileProcessor" init-method="init" destroy-method="destroy">
+    </bean>
+
+    <bean id="netezzaConnector" class="com.yizhao.apps.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">
+    </bean>
+
+
+
 </beans>

@@ -85,6 +85,10 @@ public class BackfillController {
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
+    private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
+    private FastrackFileProcessor fastrackFileProcessor = null;
+    private NetezzaConnector netezzaConnector = null;
+
     /**
      * for general
      */
@@ -107,14 +111,11 @@ public class BackfillController {
     private String type = null; // hotel or flight
     private String partition = null;
 
-    /**
-     * @param argv
-     */
-    public static void main(String[] argv) {
-
+    public static MyWaitNotify getmMyWaitNotify() {
+        return mMyWaitNotify;
     }
 
-    private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+    private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
         String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
         String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
@@ -160,30 +161,30 @@ public class BackfillController {
 
         // Step 8 - convert google hotel file to Netezza file
         log.info("------------Executing Step 8------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
 
         // Step 9 - convert google flight file to Netezza file
         log.info("------------Executing Step 9------------");
-        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
 
 
     }
 
-    private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+    private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
-            NetezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+            netezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
         } else {
-            NetezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
+            netezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
         }
     }
 
-    private static void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName) {
+    private void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName) {
         log.info("done with ekv raws to CSV file \n");
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = null;
 
-        FastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        fastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         log.info("done with CSV file to fastrack file\n");
         File f = new File(csvFileOutputPath);
         if (FileDeleteUtil.deleteFile(f) == 1) {
@@ -193,7 +194,7 @@ public class BackfillController {
         }
     }
 
-    private static void dirCleanThread(String fileSourceInput) {
+    private void dirCleanThread(String fileSourceInput) {
         ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
         File inputDir = new File(fileSourceInput);
         File outputDir = null;
@@ -203,7 +204,7 @@ public class BackfillController {
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "delete"));
     }
 
-    private static void detectUdcuv2Finish(String fileSourceInput) {
+    private void detectUdcuv2Finish(String fileSourceInput) {
         ExecutorService threadPool = ThreadUtil.newThread(threadPools, fileSourceInput, true, Thread.NORM_PRIORITY);
         File inputDir = new File(fileSourceInput);
         File outputDir = null;
@@ -213,8 +214,28 @@ public class BackfillController {
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
     }
 
-    public static MyWaitNotify getmMyWaitNotify() {
-        return mMyWaitNotify;
+    public GoogleCloudFileToNetezzaFileConvertor getGoogleCloudFileToNetezzaFileConvertor() {
+        return googleCloudFileToNetezzaFileConvertor;
+    }
+
+    public void setGoogleCloudFileToNetezzaFileConvertor(GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor) {
+        this.googleCloudFileToNetezzaFileConvertor = googleCloudFileToNetezzaFileConvertor;
+    }
+
+    public FastrackFileProcessor getFastrackFileProcessor() {
+        return fastrackFileProcessor;
+    }
+
+    public void setFastrackFileProcessor(FastrackFileProcessor fastrackFileProcessor) {
+        this.fastrackFileProcessor = fastrackFileProcessor;
+    }
+
+    public NetezzaConnector getNetezzaConnector() {
+        return netezzaConnector;
+    }
+
+    public void setNetezzaConnector(NetezzaConnector netezzaConnector) {
+        this.netezzaConnector = netezzaConnector;
     }
 
     public String getMode() {
@@ -325,7 +346,7 @@ public class BackfillController {
                     return;
                 }
 
-                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
+                googleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
             } else if (mode.equals("dump")) {
                 if (option == null) {
                     log.error("option is null");
@@ -367,8 +388,6 @@ public class BackfillController {
 
 
                 }
-
-
 
 
                 String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
@@ -433,7 +452,7 @@ public class BackfillController {
                         dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
                     }
                 }
-            } else if(mode.equals("backfill")){
+            } else if (mode.equals("backfill")) {
                 if (option == null) {
                     log.error("option is null");
                     return;

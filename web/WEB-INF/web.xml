@@ -4,13 +4,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-    <display-name>ENG835 Backfill</display-name>
+    <display-name>Backfill</display-name>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            WEB-INF/configFiles.xml
-            WEB-INF/backfill.xml
+            web/WEB-INF/configFiles.xml
+            web/WEB-INF/backfill.xml
         </param-value>
     </context-param>
 </web-app>

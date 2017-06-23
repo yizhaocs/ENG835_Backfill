@@ -6,7 +6,7 @@ import java.io.File;
  * Created by yzhao on 4/15/17.
  */
 public class FileDeleteUtil {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         File a = new File("/Users/yzhao/Desktop/pde_map_block_toCountry.csv");
         System.out.println(deleteFile(a));
 
@@ -15,12 +15,11 @@ public class FileDeleteUtil {
 
 
     /**
-     *
      * @param rootPath
      * @param fileEndWith
      * @return
      */
-    public static int deleteFilesUnderDir(String rootPath, final String fileEndWith){
+    public static int deleteFilesUnderDir(String rootPath, final String fileEndWith) {
         File[] files = DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith);
         int count = deleteFiles(files); // success deleted file
         return count;
@@ -29,6 +28,7 @@ public class FileDeleteUtil {
 
     /**
      * Delete given array of files
+     *
      * @param filesToDelete
      * @return
      */

@@ -19,32 +19,32 @@ import java.util.Scanner;
 
 /**
  * Merges EKV raws, then converts and writes to the fastrack file.
- *
- *
+ * <p>
+ * <p>
  * EKV raw format:
- *      event_id|key_id|value|cookie_id|dp_id|location_id|modification_ts
- *      3077146869351|16491|2120|305402241992|2120|1522861|2017-02-09 10:25:38
- *      3077146869351|17647|roomguru|305402241992|2120|1522861|2017-02-09 10:25:38
- *      3077146869351|17398|hm|305402241992|2120|1522861|2017-02-09 10:25:38
- *
- *
+ * event_id|key_id|value|cookie_id|dp_id|location_id|modification_ts
+ * 3077146869351|16491|2120|305402241992|2120|1522861|2017-02-09 10:25:38
+ * 3077146869351|17647|roomguru|305402241992|2120|1522861|2017-02-09 10:25:38
+ * 3077146869351|17398|hm|305402241992|2120|1522861|2017-02-09 10:25:38
+ * <p>
+ * <p>
  * fastrack file format:
- *      ckvraw|timestamp(seconds)|cookie_id|key1=value1&key2=value2&...keyN=valueN|event_id|dp_id|dp_user_id|location_id|referer_url|domain|user_agent
- *      ckvraw|1486664738|305402241992|16491=2120&17647=roomguru&17398=hm|3077146869351|2120|null|1522861|null|null|null
+ * ckvraw|timestamp(seconds)|cookie_id|key1=value1&key2=value2&...keyN=valueN|event_id|dp_id|dp_user_id|location_id|referer_url|domain|user_agent
+ * ckvraw|1486664738|305402241992|16491=2120&17647=roomguru&17398=hm|3077146869351|2120|null|1522861|null|null|null
  *
  * @author YI ZHAO
  */
 public class FastrackFileProcessor {
     private static final Logger log = Logger.getLogger(FastrackFileProcessor.class);
     private static final StrTokenizer st = StrTokenizer.getCSVInstance();
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
     static {
         st.setDelimiterChar('|');
     }
 
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-
-    public static void execute(String inFilePath, String fastrackFileOutputPath) {
+    public void execute(String inFilePath, String fastrackFileOutputPath) {
         Map<String, FastrackFileDao> eventIdToData = new HashMap<String, FastrackFileDao>();
         int rowCount = 0;
         String preEventId = null;
@@ -71,14 +71,14 @@ public class FastrackFileProcessor {
                 // 2017-03-15 23:04:35
 
                 Date date = null;
-                try{
+                try {
                     date = dateFormat.parse(modification_ts);
-                }catch(Exception e){
-                        // for some cases, the seconds[ss] is missing, so we take care inside the catch block
-                        DateFormat dateFormatTmp = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-                    try{
+                } catch (Exception e) {
+                    // for some cases, the seconds[ss] is missing, so we take care inside the catch block
+                    DateFormat dateFormatTmp = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+                    try {
                         date = dateFormatTmp.parse(modification_ts);
-                    }catch(Exception e2){
+                    } catch (Exception e2) {
                         log.error("error data format event_id:" + event_id + " ,modification_ts:" + modification_ts + "\n");
                         log.error("Exception in FastrackFileProcessor:" + "\n");
                         e2.printStackTrace();
@@ -86,10 +86,10 @@ public class FastrackFileProcessor {
                 }
                 long modification_ts_unixTime = DateUtil.dateToUnixTime(date);
                 // true if read the first row of the file
-                if(preEventId == null && curEventId == null){
+                if (preEventId == null && curEventId == null) {
                     preEventId = event_id;
                     curEventId = event_id;
-                }else{
+                } else {
                     curEventId = event_id;
                 }
 
@@ -102,7 +102,7 @@ public class FastrackFileProcessor {
                     eventIdToData.put(event_id, curFastrackFileDao);
 
                     // true if start with new event_id, so we cloging the old one in to fastrack file
-                    if(preEventId.equals(curEventId) == false) {
+                    if (preEventId.equals(curEventId) == false) {
                         FastrackFileDao preFastrackFileDao = eventIdToData.get(preEventId);
                         out.write(toCKVRAW(preFastrackFileDao));
                         out.write("\n");
@@ -136,13 +136,22 @@ public class FastrackFileProcessor {
                 if (out != null) {
                     out.close();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 log.error("Caught IOException: " + e.getMessage());
             }
         }
     }
 
-    private static String toCKVRAW(FastrackFileDao mFastrackFileDao){
-        return "ckvraw" + "|" + mFastrackFileDao.getModification_ts() + "|" + mFastrackFileDao.getCookie_id() + "|" + mFastrackFileDao.getKvPair() + "|" + mFastrackFileDao.getEvent_id() + "|" + mFastrackFileDao.getDp_id() +  "|" + "null" + "|" + mFastrackFileDao.getLocation_id() +  "|" + "null" +  "|" + "null" +  "|" + "null";
+    private String toCKVRAW(FastrackFileDao mFastrackFileDao) {
+        return "ckvraw" + "|" + mFastrackFileDao.getModification_ts() + "|" + mFastrackFileDao.getCookie_id() + "|" + mFastrackFileDao.getKvPair() + "|" + mFastrackFileDao.getEvent_id() + "|" + mFastrackFileDao.getDp_id() + "|" + "null" + "|" + mFastrackFileDao.getLocation_id() + "|" + "null" + "|" + "null" + "|" + "null";
+    }
+
+    public void init() {
+
+    }
+
+
+    public void destroy() {
+
     }
 }

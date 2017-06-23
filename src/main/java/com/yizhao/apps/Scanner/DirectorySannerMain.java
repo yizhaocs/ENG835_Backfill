@@ -1,7 +1,6 @@
 package com.yizhao.apps.Scanner;
 
 
-
 import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
 import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
 import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
