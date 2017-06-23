@@ -13,6 +13,7 @@
           init-method="init" destroy-method="destroy">
         <property name="googleCloudFileToNetezzaFileConvertor" ref="googleCloudFileToNetezzaFileConvertor" />
         <property name="fastrackFileProcessor" ref="fastrackFileProcessor" />
+        <property name="netezzaConnector" ref="netezzaConnector" />
 
         <!--for general-->
         <property name="mode" value="${mode}" />
