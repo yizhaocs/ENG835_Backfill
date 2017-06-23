@@ -224,34 +224,54 @@ public class BackfillMain {
         String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
 
+
         // Step 1 - dumpEkvrawFromNetezza
+        System.out.println("------------Executing Step 1------------");
         dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
+
         // Step 2 - processEkvrawToGenerateFastrackFile
+        System.out.println("------------Executing Step 2------------");
         processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+
         // Step 3 - move fastrack file to udcuv2 inbox
+        System.out.println("------------Executing Step 3------------");
         File file = new File(fastrackFileOutputPath);
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
         FileMoveUtil.moveFile(file, toDirectory);
+
         // Step 4 - make sure there is no files in following dirs
+        System.out.println("------------Executing Step 4------------");
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
         dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+
         // Step 5 - to know the udcuv2 finish up processing the file
+        System.out.println("------------Executing Step 5------------");
         detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+
         // Step 6 - move hotel files
+        System.out.println("------------Executing Step 6------------");
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
 
         DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File(processedGoogleCloudHotelFilePath));
+
         // Step 7 - move flight files
+        System.out.println("------------Executing Step 7------------");
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
 
         DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error",".csv", new File(processedGoogleCloudFlightFilePath));
+
         // Step 8 - convert google hotel file to Netezza file
+        System.out.println("------------Executing Step 8------------");
         GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+
         // Step 9 - convert google flight file to Netezza file
+        System.out.println("------------Executing Step 9------------");
         GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+
         // Step final - clean up all thread
+        System.out.println("------------Executing Step final------------");
         ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
     }
 
