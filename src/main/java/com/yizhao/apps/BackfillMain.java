@@ -8,6 +8,7 @@ import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
 import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
 import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
 import com.yizhao.apps.Util.DateUtil;
+import com.yizhao.apps.Util.FileUtils.DirCreateUtil;
 import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
 import com.yizhao.apps.Util.MathUtil;
@@ -218,32 +219,40 @@ public class BackfillMain {
     }
 
     private static void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception{
-            // Step 1 - dumpEkvrawFromNetezza
-            dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
-            // Step 2 - processEkvrawToGenerateFastrackFile
-            processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
-            // Step 3 - move fastrack file to udcuv2 inbox
-            File file = new File(fastrackFileOutputPath);
-            File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
-            FileMoveUtil.moveFile(file, toDirectory);
-            // Step 4 - make sure there is no files in following dirs
-            dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
-            dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
-            // Step 5 - to know the udcuv2 finish up processing the file
-            detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
-            // Step 6 - move hotel and flight google files
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
 
+        // Step 1 - dumpEkvrawFromNetezza
+        dumpEkvrawFromNetezza(table, csvFileOutputPath,  partition, curYear, curYearMonth);
+        // Step 2 - processEkvrawToGenerateFastrackFile
+        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+        // Step 3 - move fastrack file to udcuv2 inbox
+        File file = new File(fastrackFileOutputPath);
+        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
+        FileMoveUtil.moveFile(file, toDirectory);
+        // Step 4 - make sure there is no files in following dirs
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+        // Step 5 - to know the udcuv2 finish up processing the file
+        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+        // Step 6 - move hotel files
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat",".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
 
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error",".csv", new File(processedGoogleCloudHotelFilePath));
+        // Step 7 - move flight files
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
 
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat",".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-
-            // Step final - clean up all concat dir
-            FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/google/ekvraw/concat", ".csv");
-            FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/hdfs/ekv/concat", ".csv");
-            // Step final - clean up all thread
-            ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error",".csv", new File(processedGoogleCloudFlightFilePath));
+        // Step 8 - convert google hotel file to Netezza file
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+        // Step 9 - convert google flight file to Netezza file
+        GoogleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+        // Step final - clean up all thread
+        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
     }
 
     private static void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
