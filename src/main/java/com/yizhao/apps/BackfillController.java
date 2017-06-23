@@ -83,9 +83,45 @@ public class BackfillController {
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
+
+    /**
+     * for general
+     */
+    private String mode = null; // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
+
+    /**
+     * for mode=backfill & dump
+     */
+    private String option = null; // r is partition by reminder, d is partition by date
     private String table = null;
     private String startDate = null;
     private String endDate = null;
+
+    /**
+     * for mode=convert
+     */
+    private String inputPath = null;
+    private String outPutPath = null;
+    private String monthYear = null;
+    private String type = null; // hotel or flight
+    private String partition = null;
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    public String getOption() {
+        return option;
+    }
+
+    public void setOption(String option) {
+        this.option = option;
+    }
+
 
     public String getTable() {
         return table;
@@ -109,6 +145,46 @@ public class BackfillController {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getOutPutPath() {
+        return outPutPath;
+    }
+
+    public void setOutPutPath(String outPutPath) {
+        this.outPutPath = outPutPath;
+    }
+
+    public String getInputPath() {
+        return inputPath;
+    }
+
+    public void setInputPath(String inputPath) {
+        this.inputPath = inputPath;
+    }
+
+    public String getMonthYear() {
+        return monthYear;
+    }
+
+    public void setMonthYear(String monthYear) {
+        this.monthYear = monthYear;
+    }
+
+    public String getPartition() {
+        return partition;
+    }
+
+    public void setPartition(String partition) {
+        this.partition = partition;
     }
 
     /**
@@ -224,57 +300,66 @@ public class BackfillController {
     }
 
     public void init() {
-        String mode = null; // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
+
+        if(mode == null){
+            return;
+        }
 
         try {
-            mode = argv[0];
             if (mode.equals("convert")) {
-                String inputPath = argv[1];
-                String outPutPath = argv[2];
-                String monthYear = argv[3];
-                String type = argv[4];
-                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_"  + type + "_001.csv", type);
-            } else if (mode.equals("dump")) {
-
-                String option = null; // r is partition by reminder, d is partition by date
-                String table = null;
-                String partition = null;
-                String startYearDate = null;
-                String startYear = null;
-                String startYearMonth = null;
-                String endYearDate = null;
-                String endYear = null;
-                String endYearMonth = null;
-
-                option = argv[1];
-                if (argv.length >= 3) {
-                    table = argv[2];
+                if(inputPath == null){
+                    return;
                 }
 
-                if (option.equals("d")) {
-                    if (argv.length >= 4) {
-                        startYearDate = argv[5];
-                        String[] startYearDateStr = startYearDate.split("-");
-                        startYear = startYearDateStr[0];
-                        startYearMonth = startYearDateStr[1];
-                    }
+                if(outPutPath == null){
+                    return;
+                }
 
-                    if (argv.length == 5) {
-                        endYearDate = argv[4];
-                        String[] endYearDateStr = endYearDate.split("-");
-                        endYear = endYearDateStr[0];
-                        endYearMonth = endYearDateStr[1];
-                    }
+                if(monthYear == null){
+                    return;
+                }
 
-                    if (startYearDate == null) {
+                if(type == null){
+                    return;
+                }
+
+                GoogleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_"  + type + "_001.csv", type);
+            } else if (mode.equals("dump")) {
+                if(option == null){
+                    return;
+                }
+
+                if(option.equals("d")){
+                    if (startDate == null) {
                         System.out.println("argument 2 startYearDate is missing");
                         return;
                     }
                 } else if (option.equals("r")) {
-                    if (argv.length >= 4) {
-                        partition = argv[3];
+                    if(partition == null){
+                        return;
                     }
                 }
+
+                String partition = null;
+                String startYear = null;
+                String startYearMonth = null;
+                String endYear = null;
+                String endYearMonth = null;
+                    if (option.equals("d")) {
+                        if (startDate != null) {
+                            String[] startYearDateStr = startDate.split("-");
+                            startYear = startYearDateStr[0];
+                            startYearMonth = startYearDateStr[1];
+                        }
+
+                        if (endDate != null) {
+                            String[] endYearDateStr = endDate.split("-");
+                            endYear = endYearDateStr[0];
+                            endYearMonth = endYearDateStr[1];
+                        }
+
+
+                    }
 
                 if (table == null) {
                     System.out.println("argument 1 taleName is missing");
@@ -307,7 +392,7 @@ public class BackfillController {
                     System.out.println("endYearMonth:" + endYearMonth);
 
 
-                    if (endYearDate != null) {
+                    if (endDate != null) {
                         int count = 0;
                         String curYear = startYear;
                         String curYearMonth = startYearMonth;
@@ -329,7 +414,6 @@ public class BackfillController {
 
                         // run for the final month
                         runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
-
                     } else {
                         // only get one month
                         runBackfill(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
@@ -343,7 +427,6 @@ public class BackfillController {
                         }
                     } else {
                         runBackfill(table, csvFileOutputPath,  partition, null, null, fastrackFileOutputPath, fileHostName);
-
                     }
                 }
             }

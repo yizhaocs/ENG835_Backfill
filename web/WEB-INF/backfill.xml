@@ -11,9 +11,20 @@
 
     <bean id="udcuController" class="com.yizhao.apps.BackfillController"
           init-method="init" destroy-method="destroy">
+        <!--for general-->
+        <property name="mode" value="${mode}" />
 
+        <!--for mode=backfill & dump-->
+        <property name="option" value="${option}" />
         <property name="table" value="${table}" />
         <property name="startDate" value="${startDate}" />
         <property name="endDate" value="${endDate}" />
+
+        <!--for mode=convert-->
+        <property name="inputPath" value="${inputPath}" />
+        <property name="outPutPath" value="${outPutPath}" />
+        <property name="monthYear" value="${monthYear}" />
+        <property name="type" value="${type}" />
+        <property name="partition" value="${partition}" />
     </bean>
 </beans>
