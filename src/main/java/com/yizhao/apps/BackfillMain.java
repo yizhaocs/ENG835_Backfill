@@ -83,10 +83,6 @@ public class BackfillMain {
     private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
 
-    static{
-        mMyWaitNotify.doWait();
-    }
-
     /**
      * @param argv
      */
@@ -235,7 +231,7 @@ public class BackfillMain {
             dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
             // Step 5 - to know the udcuv2 finish up processing the file
             detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
-
+            // Step 6 - move hotel and flight google files
 
             // Step final - clean up all concat dir
             FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/google/ekvraw/concat", ".csv");

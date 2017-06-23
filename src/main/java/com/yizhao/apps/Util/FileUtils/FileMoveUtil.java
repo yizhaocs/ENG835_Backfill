@@ -15,6 +15,22 @@ public class FileMoveUtil {
         File from = new File("/Users/yzhao/Desktop/test.txt");
         File to = new File("/Users/yzhao/Desktop/test2.txt");
         doMoveFile(from, to, false);
+
+        moveFilesUnderDir("/Users/yzhao/Desktop/input",".jpg", new File("/Users/yzhao/Desktop/output"));
+    }
+
+
+    /**
+     *
+     * @param rootPath
+     * @param fileEndWith
+     * @param toDirectory
+     */
+    public static void moveFilesUnderDir(String rootPath, final String fileEndWith, File toDirectory) throws IOException {
+        File[] files = GetAllFilesInDir.getAllFilesInDir(rootPath, fileEndWith);
+        for(File f: files){
+            moveFile(f, toDirectory);
+        }
     }
 
     /**
