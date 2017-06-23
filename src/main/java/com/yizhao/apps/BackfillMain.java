@@ -232,6 +232,7 @@ public class BackfillMain {
             // Step 5 - to know the udcuv2 finish up processing the file
             detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
             // Step 6 - move hotel and flight google files
+            FileMoveUtil.moveFilesUnderDir("/Users/yzhao/Desktop/input",".jpg", new File("/Users/yzhao/Desktop/output"));
 
             // Step final - clean up all concat dir
             FileDeleteUtil.deleteFilesUnderDir("/opt/opinmind/var/google/ekvraw/concat", ".csv");
