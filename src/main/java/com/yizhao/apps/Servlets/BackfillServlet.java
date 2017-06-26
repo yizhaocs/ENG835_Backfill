@@ -37,6 +37,7 @@ public class BackfillServlet implements HttpRequestHandler {
         String table = null;
         String startDate = null;
         String endDate = null;
+        // for mode = dump
         String partition = null;
         // for mode = convert
         String inputPath = null;
@@ -50,9 +51,9 @@ public class BackfillServlet implements HttpRequestHandler {
 
         try {
             if (mode.equals("backfill")) {
-                backfillController.runModeBackfill();
+                backfillController.runModeBackfill(option, table, startDate, endDate);
             }else if (mode.equals("convert")) {
-                backfillController.runModeDump();
+                backfillController.runModeDump(option, table, startDate, endDate, partition);
             } else if (mode.equals("dump")) {
                 backfillController.runModeConvert(inputPath,outPutPath,monthYear,type);
             }

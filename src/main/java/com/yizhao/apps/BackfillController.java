@@ -115,7 +115,7 @@ public class BackfillController {
         return mMyWaitNotify;
     }
 
-    public void runModeBackfill() throws Exception{
+    public void runModeBackfill(String option, String table, String startDate, String endDate) throws Exception{
         if (option == null) {
             log.error("option is null");
             return;
@@ -220,7 +220,7 @@ public class BackfillController {
         }
     }
 
-    public void runModeDump() throws Exception{
+    public void runModeDump(String option, String table, String startDate, String endDate, String partition) throws Exception{
         if (option == null) {
             log.error("option is null");
             return;
