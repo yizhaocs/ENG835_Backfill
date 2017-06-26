@@ -10,4 +10,4 @@ target/*
 /CVS/
 dist/*
 out/*
-
+lib/*
