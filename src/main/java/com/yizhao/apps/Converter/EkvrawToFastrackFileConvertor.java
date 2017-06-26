@@ -1,4 +1,4 @@
-package com.yizhao.apps.Processor;
+package com.yizhao.apps.Converter;
 
 import com.yizhao.apps.Model.FastrackFileDao;
 import com.yizhao.apps.Util.DateUtil;
@@ -34,8 +34,8 @@ import java.util.Scanner;
  *
  * @author YI ZHAO
  */
-public class FastrackFileProcessor {
-    private static final Logger log = Logger.getLogger(FastrackFileProcessor.class);
+public class EkvrawToFastrackFileConvertor {
+    private static final Logger log = Logger.getLogger(EkvrawToFastrackFileConvertor.class);
     private static final StrTokenizer st = StrTokenizer.getCSVInstance();
 
     static {

@@ -3,11 +3,11 @@ package com.yizhao.apps;
 
 import com.yizhao.apps.Connector.NetezzaConnector;
 import com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor;
-import com.yizhao.apps.Processor.FastrackFileProcessor;
+import com.yizhao.apps.Converter.EkvrawToFastrackFileConvertor;
+import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileCrawler.FileCrawler;
 import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileFilter.fastrackFileFilter;
 import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileProcessor.FileProcessor;
-import com.yizhao.apps.Util.DateUtil;
 import com.yizhao.apps.Util.FileUtils.general.DirCreateUtil;
 import com.yizhao.apps.Util.FileUtils.general.FileDeleteUtil;
 import com.yizhao.apps.Util.FileUtils.general.FileMoveUtil;
@@ -86,7 +86,7 @@ public class BackfillController {
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
-    public FastrackFileProcessor fastrackFileProcessor = null;
+    public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
     private NetezzaConnector netezzaConnector = null;
 
     /**
@@ -419,7 +419,7 @@ public class BackfillController {
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = null;
 
-        fastrackFileProcessor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        ekvrawToFastrackFileConvertor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         log.info("done with CSV file to fastrack file\n");
         File f = new File(csvFileOutputPath);
         if (FileDeleteUtil.deleteFile(f) == 1) {
@@ -457,12 +457,12 @@ public class BackfillController {
         this.googleCloudFileToNetezzaFileConvertor = googleCloudFileToNetezzaFileConvertor;
     }
 
-    public FastrackFileProcessor getFastrackFileProcessor() {
-        return fastrackFileProcessor;
+    public EkvrawToFastrackFileConvertor getEkvrawToFastrackFileConvertor() {
+        return ekvrawToFastrackFileConvertor;
     }
 
-    public void setFastrackFileProcessor(FastrackFileProcessor fastrackFileProcessor) {
-        this.fastrackFileProcessor = fastrackFileProcessor;
+    public void setEkvrawToFastrackFileConvertor(EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor) {
+        this.ekvrawToFastrackFileConvertor = ekvrawToFastrackFileConvertor;
     }
 
     public NetezzaConnector getNetezzaConnector() {
