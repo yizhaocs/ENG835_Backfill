@@ -1,4 +1,4 @@
-package com.yizhao.apps.Util.FileUtils;
+package com.yizhao.apps.Util.FileUtils.general;
 
 
 import com.yizhao.apps.Util.ArgumentUtils.ArgumentsUtil;

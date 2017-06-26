@@ -1,9 +1,9 @@
-package com.yizhao.apps.Scanner;
+package com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner;
 
 
-import com.yizhao.apps.Scanner.FileCrawler.FileCrawler;
-import com.yizhao.apps.Scanner.FileFilter.fastrackFileFilter;
-import com.yizhao.apps.Scanner.FileProcessor.FileProcessor;
+import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileCrawler.FileCrawler;
+import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileFilter.fastrackFileFilter;
+import com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileProcessor.FileProcessor;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;

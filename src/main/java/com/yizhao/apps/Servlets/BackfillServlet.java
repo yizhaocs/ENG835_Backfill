@@ -18,15 +18,6 @@ public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
     private BackfillController backfillController;
 
-    public void init() throws ServletException {
-        log.info("[BackfillServlet.init]");
-    }
-
-    public void destroy() throws ServletException {
-        log.info("[BackfillServlet.destroy]");
-    }
-
-
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String mode = req.getParameter("mode");
@@ -44,6 +35,7 @@ public class BackfillServlet implements HttpRequestHandler {
         String type = null;
 
         if (mode == null) {
+            log.error("[BackfillServlet.handleRequest] mode is null " + "\n");
             return;
         }
 
@@ -62,17 +54,17 @@ public class BackfillServlet implements HttpRequestHandler {
             log.error("[BackfillServlet.handleRequest]:" + "\n");
             e.printStackTrace();
         }
-
-        System.out.println("lololol");
-        System.out.println(req.getParameter("mode"));
-        System.out.println(req.getParameter("inputPath"));
-    }
-
-    public BackfillController getBackfillController() {
-        return backfillController;
     }
 
     public void setBackfillController(BackfillController backfillController) {
         this.backfillController = backfillController;
+    }
+
+    public void init() throws ServletException {
+        log.info("[BackfillServlet.init]");
+    }
+
+    public void destroy() throws ServletException {
+        log.info("[BackfillServlet.destroy]");
     }
 }

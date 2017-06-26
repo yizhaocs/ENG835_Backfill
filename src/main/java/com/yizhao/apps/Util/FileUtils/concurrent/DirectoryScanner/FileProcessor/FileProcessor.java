@@ -1,9 +1,9 @@
-package com.yizhao.apps.Scanner.FileProcessor;
+package com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileProcessor;
 
 
 import com.yizhao.apps.BackfillController;
-import com.yizhao.apps.Util.FileUtils.FileDeleteUtil;
-import com.yizhao.apps.Util.FileUtils.FileMoveUtil;
+import com.yizhao.apps.Util.FileUtils.general.FileDeleteUtil;
+import com.yizhao.apps.Util.FileUtils.general.FileMoveUtil;
 import org.apache.log4j.Logger;
 
 import java.io.File;

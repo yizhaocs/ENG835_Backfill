@@ -1,4 +1,4 @@
-package com.yizhao.apps.Scanner.FileFilter;
+package com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileFilter;
 
 import java.io.File;
 import java.io.FileFilter;

@@ -1,4 +1,4 @@
-package com.yizhao.apps.Util.FileUtils;
+package com.yizhao.apps.Util.FileUtils.general;
 
 import java.io.File;
 import java.io.FileFilter;
