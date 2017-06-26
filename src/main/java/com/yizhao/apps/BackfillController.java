@@ -82,7 +82,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BackfillController {
     private static final Logger log = Logger.getLogger(BackfillController.class);
-    private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
+    private static final String DEFAULT_FILE_PATH = "/tmp/backfill/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
@@ -329,10 +329,10 @@ public class BackfillController {
     }
 
     private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
-        String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
-        String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedNetezzaFlightFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudHotelFilePath =  DEFAULT_FILE_PATH + "processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = DEFAULT_FILE_PATH + "processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = DEFAULT_FILE_PATH + "processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = DEFAULT_FILE_PATH + "processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
 
 
         // Step 1 - dumpEkvrawFromNetezza
@@ -452,7 +452,11 @@ public class BackfillController {
     }
 
     public void init() {
-
+        try {
+            DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
+        }catch (Exception e){
+            log.error("[BackfillController.init]: ", e);
+        }
     }
 
     public void destroy() {
