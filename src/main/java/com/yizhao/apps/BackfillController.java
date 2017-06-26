@@ -320,6 +320,9 @@ public class BackfillController {
 
     public void init() {
         System.out.println("hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha");
+        /*
+
+
         if (mode == null) {
             return;
         }
@@ -394,10 +397,10 @@ public class BackfillController {
                 String fastrackFileOutputPath = DEFAULT_FILE_PATH;
 
 
-                /**
+                *//**
                  * hostName has startwith properties:
                  *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-                 */
+                 *//*
 
                 String CurrentHostName = InetAddress.getLocalHost().getHostName();
                 String fileHostName = null;
@@ -497,10 +500,10 @@ public class BackfillController {
                 String fastrackFileOutputPath = DEFAULT_FILE_PATH;
 
 
-                /**
+                *//**
                  * hostName has startwith properties:
                  *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-                 */
+                 *//*
 
                 String CurrentHostName = InetAddress.getLocalHost().getHostName();
                 String fileHostName = null;
@@ -560,7 +563,7 @@ public class BackfillController {
             log.error("Exception in Main:" + "\n");
             e.printStackTrace();
         }
-
+*/
     }
 
     public void destroy() {
