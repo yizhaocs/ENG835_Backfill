@@ -1,7 +1,6 @@
 package com.yizhao.apps.Servlets;
 
 import com.yizhao.apps.BackfillController;
-import com.yizhao.apps.Util.MathUtil;
 import org.apache.log4j.Logger;
 import org.springframework.web.HttpRequestHandler;
 
@@ -9,11 +8,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.InetAddress;
 
 /**
  * curl http://localhost:8080/backfill/backfill?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
- * curl http://localhost:8080/backfill/backfill?mode=dump&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
+ * curl http://localhost:8080/backfill/backfill?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
  * curl http://localhost:8080/backfill/backfill?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition=
  */
 public class BackfillServlet implements HttpRequestHandler {
@@ -53,9 +51,9 @@ public class BackfillServlet implements HttpRequestHandler {
             if (mode.equals("backfill")) {
                 backfillController.runModeBackfill(option, table, startDate, endDate);
             }else if (mode.equals("convert")) {
-                backfillController.runModeDump(option, table, startDate, endDate, partition);
-            } else if (mode.equals("dump")) {
                 backfillController.runModeConvert(inputPath,outPutPath,monthYear,type);
+            } else if (mode.equals("dump_ekvraw")) {
+                backfillController.runModeDumpEKVraw(option, table, startDate, endDate, partition);
             }
         } catch (Exception e) {
             log.error("[BackfillServlet.handleRequest]:" + "\n");

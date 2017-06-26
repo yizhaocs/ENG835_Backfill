@@ -220,7 +220,7 @@ public class BackfillController {
         }
     }
 
-    public void runModeDump(String option, String table, String startDate, String endDate, String partition) throws Exception{
+    public void runModeDumpEKVraw(String option, String table, String startDate, String endDate, String partition) throws Exception{
         if (option == null) {
             log.error("option is null");
             return;
