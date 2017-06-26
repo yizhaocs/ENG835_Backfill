@@ -11,10 +11,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * curl http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
- * curl http://localhost:8080/backfill/run?mode="backfill"&option="d"&table="eng759_backfill_apac"&startDate="2016-12"&endDate="2017-03"
- * curl http://localhost:8080/backfill/run?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
- * curl http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition=
+ * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
+ * curl "http://localhost:8080/backfill/run?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
+ * curl "http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition="
  */
 public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
