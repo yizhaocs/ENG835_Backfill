@@ -82,11 +82,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class BackfillController {
     private static final Logger log = Logger.getLogger(BackfillController.class);
-    private static final String DEFAULT_FILE_PATH = "/home/yzhao/ENG835/";
+
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
-    private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
-    private FastrackFileProcessor fastrackFileProcessor = null;
+    public GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
+    public FastrackFileProcessor fastrackFileProcessor = null;
     private NetezzaConnector netezzaConnector = null;
 
     /**
@@ -115,7 +115,7 @@ public class BackfillController {
         return mMyWaitNotify;
     }
 
-    private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+    public void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
         String processedGoogleCloudHotelFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedGoogleCloudFlightFilePath = "/home/yzhao/processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
         String processedNetezzaHotelFilePath = "/home/yzhao/processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
@@ -170,7 +170,7 @@ public class BackfillController {
 
     }
 
-    private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+    public void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
             netezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
@@ -320,250 +320,10 @@ public class BackfillController {
 
     public void init() {
         System.out.println("hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha");
-        /*
 
 
-        if (mode == null) {
-            return;
-        }
-
-        try {
-            if (mode.equals("convert")) {
-                if (inputPath == null) {
-                    log.error("inputPath is null");
-                    return;
-                }
-
-                if (outPutPath == null) {
-                    log.error("outPutPath is null");
-                    return;
-                }
-
-                if (monthYear == null) {
-                    log.error("monthYear is null");
-                    return;
-                }
-
-                if (type == null) {
-                    log.error("type is null");
-                    return;
-                }
-
-                googleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
-            } else if (mode.equals("dump")) {
-                if (option == null) {
-                    log.error("option is null");
-                    return;
-                }
-
-                if (option.equals("d")) {
-                    if (startDate == null) {
-                        log.error("startDate is null");
-                        return;
-                    }
-                } else if (option.equals("r")) {
-                    if (partition == null) {
-                        return;
-                    }
-                }
-
-                if (table == null) {
-                    log.error("table is null");
-                    return;
-                }
-
-                String startYear = null;
-                String startYearMonth = null;
-                String endYear = null;
-                String endYearMonth = null;
-                if (option.equals("d")) {
-                    if (startDate != null) {
-                        String[] startYearDateStr = startDate.split("-");
-                        startYear = startYearDateStr[0];
-                        startYearMonth = startYearDateStr[1];
-                    }
-
-                    if (endDate != null) {
-                        String[] endYearDateStr = endDate.split("-");
-                        endYear = endYearDateStr[0];
-                        endYearMonth = endYearDateStr[1];
-                    }
 
 
-                }
-
-
-                String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
-                String fastrackFileOutputPath = DEFAULT_FILE_PATH;
-
-
-                *//**
-                 * hostName has startwith properties:
-                 *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-                 *//*
-
-                String CurrentHostName = InetAddress.getLocalHost().getHostName();
-                String fileHostName = null;
-                // hdu.include.only.sources in common.properties
-                if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
-                    fileHostName = "qa1-ps1-lax1";
-                } else {
-                    fileHostName = "ps";
-                }
-
-                if (option.equals("d")) {
-                    log.info("startYear:" + startYear);
-                    log.info("startYearMonth:" + startYearMonth);
-                    log.info("endYear:" + endYear);
-                    log.info("endYearMonth:" + endYearMonth);
-
-
-                    if (endDate != null) {
-                        int count = 0;
-                        String curYear = startYear;
-                        String curYearMonth = startYearMonth;
-                        while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                            runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
-
-                            count++;
-                            if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
-                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                            } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
-                                curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
-                                curYearMonth = "01";
-                            } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
-                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                            } else {
-                                log.info("curYear and curYearMonth are same as endYear and endYearMonth");
-                            }
-                        }
-
-                        // run for the final month
-                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
-                    } else {
-                        // only get one month
-                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, startYear, startYearMonth);
-                    }
-                } else if (option.equals("r")) {
-                    if (partition == null) {
-                        int i = 0;
-                        while (i < 10) {
-                            dumpEkvrawFromNetezza(table, csvFileOutputPath, String.valueOf(i), null, null);
-                            i++;
-                        }
-                    } else {
-                        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
-                    }
-                }
-            } else if (mode.equals("backfill")) {
-                if (option == null) {
-                    log.error("option is null");
-                    return;
-                }
-
-                if (option.equals("d")) {
-                    if (startDate == null) {
-                        log.error("startDate is null");
-                        return;
-                    }
-                } else if (option.equals("r")) {
-                    if (partition == null) {
-                        return;
-                    }
-                }
-
-                if (table == null) {
-                    log.error("table is null");
-                    return;
-                }
-
-                String startYear = null;
-                String startYearMonth = null;
-                String endYear = null;
-                String endYearMonth = null;
-                if (option.equals("d")) {
-                    if (startDate != null) {
-                        String[] startYearDateStr = startDate.split("-");
-                        startYear = startYearDateStr[0];
-                        startYearMonth = startYearDateStr[1];
-                    }
-
-                    if (endDate != null) {
-                        String[] endYearDateStr = endDate.split("-");
-                        endYear = endYearDateStr[0];
-                        endYearMonth = endYearDateStr[1];
-                    }
-                }
-
-
-                String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
-                String fastrackFileOutputPath = DEFAULT_FILE_PATH;
-
-
-                *//**
-                 * hostName has startwith properties:
-                 *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-                 *//*
-
-                String CurrentHostName = InetAddress.getLocalHost().getHostName();
-                String fileHostName = null;
-                // hdu.include.only.sources in common.properties
-                if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
-                    fileHostName = "qa1-ps1-lax1";
-                } else {
-                    fileHostName = "ps";
-                }
-
-                if (option.equals("d")) {
-                    log.info("startYear:" + startYear);
-                    log.info("startYearMonth:" + startYearMonth);
-                    log.info("endYear:" + endYear);
-                    log.info("endYearMonth:" + endYearMonth);
-
-
-                    if (endDate != null) {
-                        int count = 0;
-                        String curYear = startYear;
-                        String curYearMonth = startYearMonth;
-                        while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                            runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
-
-                            count++;
-                            if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
-                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                            } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
-                                curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
-                                curYearMonth = "01";
-                            } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
-                                curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                            } else {
-                                log.info("curYear and curYearMonth are same as endYear and endYearMonth");
-                            }
-                        }
-
-                        // run for the final month
-                        runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
-                    } else {
-                        // only get one month
-                        runBackfill(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
-                    }
-                } else if (option.equals("r")) {
-                    if (partition == null) {
-                        int i = 0;
-                        while (i < 10) {
-                            runBackfill(table, csvFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
-                            i++;
-                        }
-                    } else {
-                        runBackfill(table, csvFileOutputPath, partition, null, null, fastrackFileOutputPath, fileHostName);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Exception in Main:" + "\n");
-            e.printStackTrace();
-        }
-*/
     }
 
     public void destroy() {
