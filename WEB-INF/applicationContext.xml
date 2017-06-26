@@ -8,7 +8,7 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
     <bean id="backfillServlet" class="com.yizhao.apps.Servlets.BackfillServlet" init-method="init" destroy-method="destroy">
-
+        <property name="backfillController" ref="backfillController" />
     </bean>
 
     <bean id="backfillController" class="com.yizhao.apps.BackfillController"

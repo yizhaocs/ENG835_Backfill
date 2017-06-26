@@ -12,6 +12,8 @@ import java.io.IOException;
  * curl http://localhost:8080/backfill
  */
 public class BackfillServlet implements HttpRequestHandler {
+    private BackfillController backfillController;
+
     public void init() throws ServletException {
         System.out.println("zhao yi");
     }
@@ -24,5 +26,13 @@ public class BackfillServlet implements HttpRequestHandler {
 
 
         System.out.println("lololol");
+    }
+
+    public BackfillController getBackfillController() {
+        return backfillController;
+    }
+
+    public void setBackfillController(BackfillController backfillController) {
+        this.backfillController = backfillController;
     }
 }
