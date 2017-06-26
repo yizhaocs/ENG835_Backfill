@@ -89,33 +89,11 @@ public class BackfillController {
     public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
     private NetezzaConnector netezzaConnector = null;
 
-    /**
-     * for general
-     */
-    private String mode = null; // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
-
-    /**
-     * for mode=backfill & dump
-     */
-    private String option = null; // r is partition by reminder, d is partition by date
-    private String table = null;
-    private String startDate = null;
-    private String endDate = null;
-
-    /**
-     * for mode=convert
-     */
-    private String inputPath = null;
-    private String outPutPath = null;
-    private String monthYear = null;
-    private String type = null; // hotel or flight
-    private String partition = null;
-
     public static MyWaitNotify getmMyWaitNotify() {
         return mMyWaitNotify;
     }
 
-    public void runModeBackfill(String option, String table, String startDate, String endDate) throws Exception{
+    public void runModeBackfill(String option, String table, String startDate, String endDate, String partition) throws Exception{
         if (option == null) {
             log.error("option is null");
             return;

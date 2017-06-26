@@ -20,19 +20,18 @@ public class BackfillServlet implements HttpRequestHandler {
 
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String mode = req.getParameter("mode");
+        String mode = req.getParameter("mode"); // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
         // for mode = backfill or dump
-        String option = null;
+        String option = null; // r is partition by reminder, d is partition by date
         String table = null;
         String startDate = null;
         String endDate = null;
-        // for mode = dump
         String partition = null;
         // for mode = convert
         String inputPath = null;
         String outPutPath = null;
         String monthYear = null;
-        String type = null;
+        String type = null; // hotel or flight
 
         if (mode == null) {
             log.error("[BackfillServlet.handleRequest] mode is null " + "\n");
@@ -40,19 +39,33 @@ public class BackfillServlet implements HttpRequestHandler {
         }
 
         try {
-            if (mode.equals("backfill")) {
-                log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfill" + "\n");
-                backfillController.runModeBackfill(option, table, startDate, endDate);
-            }else if (mode.equals("dump_ekvraw")) {
-                log.info("[BackfillServlet.handleRequest] is going to execute runModeDumpEKVraw" + "\n");
-                backfillController.runModeDumpEKVraw(option, table, startDate, endDate, partition);
-            }else if (mode.equals("convert")) {
+            if (mode.equals("backfill") || mode.equals("dump_ekvraw")) {
+                option = req.getParameter("option");
+                table = req.getParameter("table");
+                startDate = req.getParameter("startDate");
+                endDate = req.getParameter("endDate");
+                if (option.equals("r")) {
+                    partition = req.getParameter("mode");
+                }
+
+                if (mode.equals("backfill")) {
+                    log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfill" + "\n");
+                    backfillController.runModeBackfill(option, table, startDate, endDate, partition);
+                } else if (mode.equals("dump_ekvraw")) {
+                    log.info("[BackfillServlet.handleRequest] is going to execute runModeDumpEKVraw" + "\n");
+                    backfillController.runModeDumpEKVraw(option, table, startDate, endDate, partition);
+                }
+            } else if (mode.equals("convert")) {
+                inputPath = req.getParameter("inputPath");
+                outPutPath = req.getParameter("outPutPath");
+                monthYear = req.getParameter("monthYear");
+                type = req.getParameter("type");
+
                 log.info("[BackfillServlet.handleRequest] is going to execute runModeConvert" + "\n");
-                backfillController.runModeConvert(inputPath,outPutPath,monthYear,type);
+                backfillController.runModeConvert(inputPath, outPutPath, monthYear, type);
             }
         } catch (Exception e) {
-            log.error("[BackfillServlet.handleRequest]:" + "\n");
-            e.printStackTrace();
+            log.error("[BackfillServlet.handleRequest]: ", e);
         }
     }
 

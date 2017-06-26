@@ -118,14 +118,11 @@ public class EkvrawToFastrackFileConvertor {
             out.write(toCKVRAW(preFastrackFileDao));
             rowCount++;
         } catch (FileNotFoundException e) {
-            log.error("Exception in FastrackFileProcessor:" + "\n");
-            e.printStackTrace();
+            log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
         } catch (IOException e) {
-            log.error("Exception in FastrackFileProcessor:" + "\n");
-            e.printStackTrace();
+            log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
         } catch (Exception e) {
-            log.error("Exception in FastrackFileProcessor:" + "\n");
-            e.printStackTrace();
+            log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
         } finally {
             log.info("Total row generated for fastrack is:" + rowCount + "\n");
             if (s != null) {

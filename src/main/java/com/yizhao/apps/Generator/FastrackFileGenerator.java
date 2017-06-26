@@ -47,7 +47,7 @@ public class FastrackFileGenerator {
                     out.close();
                 }
             } catch (IOException e) {
-                log.error("Caught IOException: " + e.getMessage());
+                log.error("[FastrackFileGenerator.execute]: ", e);
             }
         }
     }
