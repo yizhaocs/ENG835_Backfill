@@ -21,7 +21,7 @@
     <bean id="googleCloudFileToNetezzaFileConvertor" class="com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
-    <bean id="fastrackFileProcessor" class="com.yizhao.apps.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
+    <bean id="ekvrawToFastrackFileConvertor" class="com.yizhao.apps.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
     <bean id="netezzaConnector" class="com.yizhao.apps.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">

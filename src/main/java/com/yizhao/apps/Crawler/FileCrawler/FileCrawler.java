@@ -1,4 +1,4 @@
-package com.yizhao.apps.Util.FileUtils.concurrent.DirectoryScanner.FileCrawler;
+package com.yizhao.apps.Crawler.FileCrawler;
 
 import java.io.File;
 import java.io.FileFilter;
