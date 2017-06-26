@@ -7,24 +7,24 @@
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
-    <bean id="backfillServlet" class="com.yizhao.apps.Servlets.BackfillServlet" init-method="init" destroy-method="destroy">
+    <bean id="backfillServlet" class="com.opinmind.Servlets.BackfillServlet" init-method="init" destroy-method="destroy">
         <property name="backfillController" ref="backfillController" />
     </bean>
 
-    <bean id="backfillController" class="com.yizhao.apps.BackfillController"
+    <bean id="backfillController" class="com.opinmind.BackfillController"
           init-method="init" destroy-method="destroy">
         <property name="googleCloudFileToNetezzaFileConvertor" ref="googleCloudFileToNetezzaFileConvertor" />
         <property name="ekvrawToFastrackFileConvertor" ref="ekvrawToFastrackFileConvertor" />
         <property name="netezzaConnector" ref="netezzaConnector" />
     </bean>
 
-    <bean id="googleCloudFileToNetezzaFileConvertor" class="com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
+    <bean id="googleCloudFileToNetezzaFileConvertor" class="com.opinmind.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
-    <bean id="ekvrawToFastrackFileConvertor" class="com.yizhao.apps.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
+    <bean id="ekvrawToFastrackFileConvertor" class="com.opinmind.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
-    <bean id="netezzaConnector" class="com.yizhao.apps.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">
+    <bean id="netezzaConnector" class="com.opinmind.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">
         <property name="DB_CONNECTION" value="${db_connection}" />
         <property name="DB_USER" value="${db_user}" />
         <property name="DB_PASSWORD" value="${db_password}" />
