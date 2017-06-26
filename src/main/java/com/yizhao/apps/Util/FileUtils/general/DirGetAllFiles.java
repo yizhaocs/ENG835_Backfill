@@ -33,6 +33,10 @@ public class DirGetAllFiles {
     public static File[] getAllFilesInDir(String rootPath, final String fileEndWith) {
         File testDirectory = new File(rootPath);
 
+        if(!testDirectory.exists()){
+            return null;
+        }
+
         if (fileEndWith == null) {
             return testDirectory.listFiles();
         }

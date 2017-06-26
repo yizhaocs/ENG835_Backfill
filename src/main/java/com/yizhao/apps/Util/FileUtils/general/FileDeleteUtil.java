@@ -21,6 +21,9 @@ public class FileDeleteUtil {
      */
     public static int deleteFilesUnderDir(String rootPath, final String fileEndWith) {
         File[] files = DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith);
+        if(files == null){
+            return -1;
+        }
         int count = deleteFiles(files); // success deleted file
         return count;
     }

@@ -83,6 +83,8 @@ import java.util.concurrent.TimeUnit;
 public class BackfillController {
     private static final Logger log = Logger.getLogger(BackfillController.class);
     private static final String DEFAULT_FILE_PATH = "/tmp/backfill/";
+    private String ekvrawFileOutputPath = DEFAULT_FILE_PATH + "ekvrawFile/";
+    private String fastrackFileOutputPath = DEFAULT_FILE_PATH + "fastrackFile/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
@@ -134,9 +136,7 @@ public class BackfillController {
         }
 
 
-        String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
-        String fastrackFileOutputPath = DEFAULT_FILE_PATH;
-
+        ekvrawFileOutputPath = table + "_ekvraw.csv";
 
         /**
          * hostName has startwith properties:
@@ -164,7 +164,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                     count++;
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -180,20 +180,20 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
             } else {
                 // only get one month
-                runBackfill(table, csvFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
             }
         } else if (option.equals("r")) {
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    runBackfill(table, csvFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, ekvrawFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
                     i++;
                 }
             } else {
-                runBackfill(table, csvFileOutputPath, partition, null, null, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, partition, null, null, fastrackFileOutputPath, fileHostName);
             }
         }
     }
@@ -241,8 +241,7 @@ public class BackfillController {
         }
 
 
-        String csvFileOutputPath = DEFAULT_FILE_PATH + table + "_csvFileOutputPath.csv";
-        String fastrackFileOutputPath = DEFAULT_FILE_PATH;
+        ekvrawFileOutputPath = table + "_ekvraw.csv";
 
         /**
          * hostName has startwith properties:
@@ -270,7 +269,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                     count++;
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -286,20 +285,20 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
+                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, curYear, curYearMonth);
             } else {
                 // only get one month
-                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, startYear, startYearMonth);
+                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, startYear, startYearMonth);
             }
         } else if (option.equals("r")) {
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    dumpEkvrawFromNetezza(table, csvFileOutputPath, String.valueOf(i), null, null);
+                    dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, String.valueOf(i), null, null);
                     i++;
                 }
             } else {
-                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
+                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, null, null);
             }
         }
     }
@@ -453,6 +452,8 @@ public class BackfillController {
 
     public void init() {
         try {
+            FileDeleteUtil.deleteFilesUnderDir(ekvrawFileOutputPath, ".csv");
+            FileDeleteUtil.deleteFilesUnderDir(fastrackFileOutputPath, ".csv");
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
         }catch (Exception e){
             log.error("[BackfillController.init]: ", e);
