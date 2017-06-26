@@ -13,9 +13,9 @@ import java.sql.Statement;
 public class NetezzaConnector {
     private static final Logger log = Logger.getLogger(NetezzaConnector.class);
     private final String NETEZZA_DB_DRIVER = "org.netezza.Driver";
-    private final String DB_CONNECTION = "jdbc:netezza://nz-vip-nym1:5480/opinmind_dev";
-    private final String DB_USER = "opinmind_dev_admin";
-    private final String DB_PASSWORD = "29JWmn2e";
+    private String DB_CONNECTION;
+    private String DB_USER;
+    private String DB_PASSWORD;
 
     public void dataToCsvPartitionByMod(String table, String csvFileOutputPath, String partition) throws SQLException {
         Connection dbConnection = null;
@@ -211,5 +211,30 @@ public class NetezzaConnector {
 
     public void destroy() {
 
+    }
+
+
+    public String getDB_CONNECTION() {
+        return DB_CONNECTION;
+    }
+
+    public void setDB_CONNECTION(String DB_CONNECTION) {
+        this.DB_CONNECTION = DB_CONNECTION;
+    }
+
+    public String getDB_USER() {
+        return DB_USER;
+    }
+
+    public void setDB_USER(String DB_USER) {
+        this.DB_USER = DB_USER;
+    }
+
+    public String getDB_PASSWORD() {
+        return DB_PASSWORD;
+    }
+
+    public void setDB_PASSWORD(String DB_PASSWORD) {
+        this.DB_PASSWORD = DB_PASSWORD;
     }
 }
