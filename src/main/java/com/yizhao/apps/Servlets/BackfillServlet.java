@@ -8,11 +8,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
- * curl http://localhost:8080/backfill/backfill?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
- * curl http://localhost:8080/backfill/backfill?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
- * curl http://localhost:8080/backfill/backfill?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition=
+ * curl http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
+ * curl http://localhost:8080/backfill/run?mode="backfill"&option="d"&table="eng759_backfill_apac"&startDate="2016-12"&endDate="2017-03"
+ * curl http://localhost:8080/backfill/run?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03
+ * curl http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition=
  */
 public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
@@ -33,6 +35,12 @@ public class BackfillServlet implements HttpRequestHandler {
         String monthYear = null;
         String type = null; // hotel or flight
 
+        log.info("[BackfillServlet.handleRequest] getParameterMap:" + "\n");
+        for(String s: req.getParameterMap().keySet()){
+            String[] value = req.getParameterMap().get(s);
+            log.info(s + "=" + Arrays.toString(value) + "\n");
+        }
+
         if (mode == null) {
             log.error("[BackfillServlet.handleRequest] mode is null " + "\n");
             return;
@@ -45,7 +53,7 @@ public class BackfillServlet implements HttpRequestHandler {
                 startDate = req.getParameter("startDate");
                 endDate = req.getParameter("endDate");
                 if (option.equals("r")) {
-                    partition = req.getParameter("mode");
+                    partition = req.getParameter("partition");
                 }
 
                 if (mode.equals("backfill")) {

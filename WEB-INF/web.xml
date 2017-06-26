@@ -25,6 +25,6 @@
 
     <servlet-mapping>
         <servlet-name>backfillServlet</servlet-name>
-        <url-pattern>/backfill</url-pattern>
+        <url-pattern>/run</url-pattern>
     </servlet-mapping>
 </web-app>
