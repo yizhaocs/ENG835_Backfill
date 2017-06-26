@@ -16,22 +16,6 @@
         <property name="googleCloudFileToNetezzaFileConvertor" ref="googleCloudFileToNetezzaFileConvertor" />
         <property name="fastrackFileProcessor" ref="fastrackFileProcessor" />
         <property name="netezzaConnector" ref="netezzaConnector" />
-
-        <!--for general-->
-        <property name="mode" value="${mode}" />
-
-        <!--for mode=backfill & dump-->
-        <property name="option" value="${option}" />
-        <property name="table" value="${table}" />
-        <property name="startDate" value="${startDate}" />
-        <property name="endDate" value="${endDate}" />
-
-        <!--for mode=convert-->
-        <property name="inputPath" value="${inputPath}" />
-        <property name="outPutPath" value="${outPutPath}" />
-        <property name="monthYear" value="${monthYear}" />
-        <property name="type" value="${type}" />
-        <property name="partition" value="${partition}" />
     </bean>
 
     <bean id="googleCloudFileToNetezzaFileConvertor" class="com.yizhao.apps.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
@@ -45,7 +29,4 @@
         <property name="DB_USER" value="${db_user}" />
         <property name="DB_PASSWORD" value="${db_password}" />
     </bean>
-
-
-
 </beans>
