@@ -292,7 +292,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    backfillController.runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, csvFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
                     count++;
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
@@ -308,20 +308,20 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                backfillController.dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
+                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
             } else {
                 // only get one month
-                backfillController.dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, startYear, startYearMonth);
+                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, startYear, startYearMonth);
             }
         } else if (option.equals("r")) {
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    backfillController.dumpEkvrawFromNetezza(table, csvFileOutputPath, String.valueOf(i), null, null);
+                    dumpEkvrawFromNetezza(table, csvFileOutputPath, String.valueOf(i), null, null);
                     i++;
                 }
             } else {
-                backfillController.dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
+                dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, null, null);
             }
         }
     }
@@ -405,7 +405,7 @@ public class BackfillController {
 
     }
 
-    public void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+    private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
             netezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
@@ -473,91 +473,7 @@ public class BackfillController {
         this.netezzaConnector = netezzaConnector;
     }
 
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    public String getOption() {
-        return option;
-    }
-
-    public void setOption(String option) {
-        this.option = option;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getOutPutPath() {
-        return outPutPath;
-    }
-
-    public void setOutPutPath(String outPutPath) {
-        this.outPutPath = outPutPath;
-    }
-
-    public String getInputPath() {
-        return inputPath;
-    }
-
-    public void setInputPath(String inputPath) {
-        this.inputPath = inputPath;
-    }
-
-    public String getMonthYear() {
-        return monthYear;
-    }
-
-    public void setMonthYear(String monthYear) {
-        this.monthYear = monthYear;
-    }
-
-    public String getPartition() {
-        return partition;
-    }
-
-    public void setPartition(String partition) {
-        this.partition = partition;
-    }
-
     public void init() {
-        System.out.println("hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha");
-
-
-
 
     }
 
