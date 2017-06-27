@@ -365,7 +365,7 @@ public class BackfillController {
             // do nothing keep running
         }
         // detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
-        detectUdcuv2Finish("/opt/opinmind/var/google/ekvhotel/concat");
+        // detectUdcuv2Finish("/opt/opinmind/var/google/ekvhotel/concat");
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
@@ -374,7 +374,9 @@ public class BackfillController {
             break;
         }
         DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
+        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/error", ".csv").length != 0) {
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
+        }
 
 
         // Step 7 - move flight files
@@ -384,18 +386,23 @@ public class BackfillController {
             break;
         }
         DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/error", ".csv").length != 0) {
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+        }
 
         // Step 8 - convert google hotel file to Netezza file
         log.info("------------Executing Step 8------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel"  + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "hotel" + "_001.csv", "hotel");
+        if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudHotelFilePath, ".csv").length != 0) {
+            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "hotel" + "_001.csv", "hotel");
+        }
 
         // Step 9 - convert google flight file to Netezza file
         log.info("------------Executing Step 9------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath+ "/ekv_flight"  + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "flight" + "_001.csv", "flight");
-
+        if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudFlightFilePath, ".csv").length != 0) {
+            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "flight" + "_001.csv", "flight");
+        }
 
     }
 
