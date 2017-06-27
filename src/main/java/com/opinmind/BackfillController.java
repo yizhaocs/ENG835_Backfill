@@ -85,21 +85,21 @@ import java.util.concurrent.TimeUnit;
 public class BackfillController {
     private static final Logger log = Logger.getLogger(BackfillController.class);
     private static final String DEFAULT_FILE_PATH = "/tmp/backfill/";
+    private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
+    private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
+    public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
     private String ekvrawFileOutputPath = DEFAULT_FILE_PATH + "ekvrawFile/";
     private String fastrackFileOutputPath = DEFAULT_FILE_PATH + "fastrackFile/";
     private String googleCloudFiles = DEFAULT_FILE_PATH + "processedFiles/googleCloud/";
     private String netezzaCloudFiles = DEFAULT_FILE_PATH + "processedFiles/netezza/";
-    private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
-    private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
-    public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
     private NetezzaConnector netezzaConnector = null;
 
     public static MyWaitNotify getmMyWaitNotify() {
         return mMyWaitNotify;
     }
 
-    public void runModeBackfill(String option, String table, String startDate, String endDate, String partition) throws Exception{
+    public void runModeBackfill(String option, String table, String startDate, String endDate, String partition) throws Exception {
         if (option == null) {
             log.error("option is null");
             return;
@@ -202,7 +202,7 @@ public class BackfillController {
         }
     }
 
-    public void runModeDumpEKVraw(String option, String table, String startDate, String endDate, String partition) throws Exception{
+    public void runModeDumpEKVraw(String option, String table, String startDate, String endDate, String partition) throws Exception {
         if (option == null) {
             log.error("option is null");
             return;
@@ -307,7 +307,7 @@ public class BackfillController {
         }
     }
 
-    public void runModeConvert(String inputPath, String outPutPath, String monthYear, String type) throws Exception{
+    public void runModeConvert(String inputPath, String outPutPath, String monthYear, String type) throws Exception {
         if (inputPath == null) {
             log.error("inputPath is null");
             return;
@@ -334,7 +334,7 @@ public class BackfillController {
     private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
         log.info("[BackfillController.runBackfill] with table:" + table + " ,csvFileOutputPath:" + csvFileOutputPath + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth + " ,fastrackFileOutputPath:" + fastrackFileOutputPath + " ,fileHostName:" + fileHostName);
 
-        String processedGoogleCloudHotelFilePath =  googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudHotelFilePath = googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
         String processedNetezzaHotelFilePath = netezzaCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
@@ -361,7 +361,7 @@ public class BackfillController {
 
         // Step 5 - to know the udcuv2 finish up processing the file
         log.info("------------Executing Step 5------------");
-        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox",".force").length != 0){ // when inbox has no file, then udcuv2 finished
+        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox", ".force").length != 0) { // when inbox has no file, then udcuv2 finished
             // do nothing keep running
         }
         // detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
@@ -369,31 +369,32 @@ public class BackfillController {
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
-        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat",".csv").length != 0) {
+        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
             break;
         }
-            DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
 
 
-            // Step 7 - move flight files
-            log.info("------------Executing Step 7------------");
-        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat",".csv").length != 0) {
+        // Step 7 - move flight files
+        log.info("------------Executing Step 7------------");
+        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
             break;
         }
-            DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
 
-            // Step 8 - convert google hotel file to Netezza file
-            log.info("------------Executing Step 8------------");
-            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+        // Step 8 - convert google hotel file to Netezza file
+        log.info("------------Executing Step 8------------");
+        DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
 
-            // Step 9 - convert google flight file to Netezza file
-            log.info("------------Executing Step 9------------");
-            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
-
+        // Step 9 - convert google flight file to Netezza file
+        log.info("------------Executing Step 9------------");
+        DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
 
 
     }
@@ -468,24 +469,29 @@ public class BackfillController {
 
     public void init() {
         try {
+            FileDeleteUtil.deleteDirAndItsSubDirs(new File(DEFAULT_FILE_PATH));
+        } catch (Exception e) {
+            log.error("[BackfillController.init]: ", e);
+        }
+      /*  try {
             FileDeleteUtil.deleteFilesUnderDir(ekvrawFileOutputPath, ".csv");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("[BackfillController.init]: ", e);
         }
 
         try {
             FileDeleteUtil.deleteFilesUnderDir(fastrackFileOutputPath, ".csv.force");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("[BackfillController.init]: ", e);
         }
-
+*/
         try {
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
             DirCreateUtil.createDirectory(new File(ekvrawFileOutputPath));
             DirCreateUtil.createDirectory(new File(fastrackFileOutputPath));
             DirCreateUtil.createDirectory(new File(googleCloudFiles));
             DirCreateUtil.createDirectory(new File(netezzaCloudFiles));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("[BackfillController.init]: ", e);
         }
     }
