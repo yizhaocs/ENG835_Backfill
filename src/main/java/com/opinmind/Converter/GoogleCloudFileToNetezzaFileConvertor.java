@@ -103,7 +103,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 }
             }
         } catch (Exception e) {
-            log.info("failed in GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput");
+            log.error("[GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput]: ", e);
         } finally {
             if (out != null) {
                 try {

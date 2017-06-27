@@ -332,6 +332,8 @@ public class BackfillController {
     }
 
     private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
+        log.info("[BackfillController.runBackfill] with table:" + table + " ,csvFileOutputPath:" + csvFileOutputPath + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth + " ,fastrackFileOutputPath:" + fastrackFileOutputPath + " ,fileHostName:" + fileHostName);
+
         String processedGoogleCloudHotelFilePath =  googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
         String processedNetezzaHotelFilePath = netezzaCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
@@ -362,29 +364,35 @@ public class BackfillController {
         while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox",".force").length != 0){ // when inbox has no file, then udcuv2 finished
             // do nothing keep running
         }
-        //detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+        // detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+        detectUdcuv2Finish("/opt/opinmind/var/google/ekvhotel/concat");
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat",".csv").length != 0) {
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+            break;
+        }
+            DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
 
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
 
-        // Step 7 - move flight files
-        log.info("------------Executing Step 7------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+            // Step 7 - move flight files
+            log.info("------------Executing Step 7------------");
+        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat",".csv").length != 0) {
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+        }
+            DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
 
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+            // Step 8 - convert google hotel file to Netezza file
+            log.info("------------Executing Step 8------------");
+            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
 
-        // Step 8 - convert google hotel file to Netezza file
-        log.info("------------Executing Step 8------------");
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+            // Step 9 - convert google flight file to Netezza file
+            log.info("------------Executing Step 9------------");
+            googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
 
-        // Step 9 - convert google flight file to Netezza file
-        log.info("------------Executing Step 9------------");
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
 
 
     }
