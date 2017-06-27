@@ -1,4 +1,4 @@
-package com.opinmind.Util.FileUtils.general;
+package com.opinmind.Util.FileUtils;
 
 
 import com.opinmind.Util.ArgumentUtils.ArgumentsUtil;

@@ -2,8 +2,8 @@ package com.opinmind.Crawler.FileProcessor;
 
 
 import com.opinmind.BackfillController;
-import com.opinmind.Util.FileUtils.general.FileDeleteUtil;
-import com.opinmind.Util.FileUtils.general.FileMoveUtil;
+import com.opinmind.Util.FileUtils.FileDeleteUtil;
+import com.opinmind.Util.FileUtils.FileMoveUtil;
 import org.apache.log4j.Logger;
 
 import java.io.File;

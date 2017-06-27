@@ -1,6 +1,7 @@
 package com.opinmind;
 
 
+import com.opinmind.Util.DateAndTimeUtils.DateCalendar;
 import com.opinmind.Util.DateUtil;
 import com.opinmind.Connector.NetezzaConnector;
 import com.opinmind.Converter.GoogleCloudFileToNetezzaFileConvertor;
@@ -8,9 +9,10 @@ import com.opinmind.Converter.EkvrawToFastrackFileConvertor;
 import com.opinmind.Crawler.FileCrawler.FileCrawler;
 import com.opinmind.Crawler.FileFilter.fastrackFileFilter;
 import com.opinmind.Crawler.FileProcessor.FileProcessor;
-import com.opinmind.Util.FileUtils.general.DirCreateUtil;
-import com.opinmind.Util.FileUtils.general.FileDeleteUtil;
-import com.opinmind.Util.FileUtils.general.FileMoveUtil;
+import com.opinmind.Util.FileUtils.DirCreateUtil;
+import com.opinmind.Util.FileUtils.DirGetAllFiles;
+import com.opinmind.Util.FileUtils.FileDeleteUtil;
+import com.opinmind.Util.FileUtils.FileMoveUtil;
 import com.opinmind.Util.MathUtil;
 import com.opinmind.Util.ThreadUtils.general.ThreadUtil;
 import com.opinmind.Util.ThreadUtils.threadsignaling.MyWaitNotify;
@@ -85,6 +87,8 @@ public class BackfillController {
     private static final String DEFAULT_FILE_PATH = "/tmp/backfill/";
     private String ekvrawFileOutputPath = DEFAULT_FILE_PATH + "ekvrawFile/";
     private String fastrackFileOutputPath = DEFAULT_FILE_PATH + "fastrackFile/";
+    private String googleCloudFiles = DEFAULT_FILE_PATH + "processedFiles/googleCloud/";
+    private String netezzaCloudFiles = DEFAULT_FILE_PATH + "processedFiles/netezza/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
@@ -328,10 +332,10 @@ public class BackfillController {
     }
 
     private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
-        String processedGoogleCloudHotelFilePath =  DEFAULT_FILE_PATH + "processedFiles/googleCloud/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedGoogleCloudFlightFilePath = DEFAULT_FILE_PATH + "processedFiles/googleCloud/" + table + "/flight/" + curYear + "-" + curYearMonth;
-        String processedNetezzaHotelFilePath = DEFAULT_FILE_PATH + "processedFiles/netezza/" + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedNetezzaFlightFilePath = DEFAULT_FILE_PATH + "processedFiles/netezza/" + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudHotelFilePath =  googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = netezzaCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
 
 
         // Step 1 - dumpEkvrawFromNetezza
@@ -346,7 +350,7 @@ public class BackfillController {
         log.info("------------Executing Step 3------------");
         File file = new File(fastrackFileOutputPath);
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
-        FileMoveUtil.moveFile(file, toDirectory);
+        FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
 
         // Step 4 - make sure there is no files in following dirs
         log.info("------------Executing Step 4------------");
@@ -355,7 +359,10 @@ public class BackfillController {
 
         // Step 5 - to know the udcuv2 finish up processing the file
         log.info("------------Executing Step 5------------");
-        detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
+        while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox",".force").length != 0){ // when inbox has no file, then udcuv2 finished
+            // do nothing keep running
+        }
+        //detectUdcuv2Finish("/opt/opinmind/var/udcuv2/archive");
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
@@ -394,7 +401,7 @@ public class BackfillController {
     private void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName) {
         log.info("done with ekv raws to CSV file \n");
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
-        String timeStamp = null;
+        String timeStamp = DateCalendar.getUnixTimeStamp();
 
         ekvrawToFastrackFileConvertor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         log.info("done with CSV file to fastrack file\n");
@@ -453,8 +460,22 @@ public class BackfillController {
     public void init() {
         try {
             FileDeleteUtil.deleteFilesUnderDir(ekvrawFileOutputPath, ".csv");
-            FileDeleteUtil.deleteFilesUnderDir(fastrackFileOutputPath, ".csv");
+        }catch (Exception e){
+            log.error("[BackfillController.init]: ", e);
+        }
+
+        try {
+            FileDeleteUtil.deleteFilesUnderDir(fastrackFileOutputPath, ".csv.force");
+        }catch (Exception e){
+            log.error("[BackfillController.init]: ", e);
+        }
+
+        try {
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
+            DirCreateUtil.createDirectory(new File(ekvrawFileOutputPath));
+            DirCreateUtil.createDirectory(new File(fastrackFileOutputPath));
+            DirCreateUtil.createDirectory(new File(googleCloudFiles));
+            DirCreateUtil.createDirectory(new File(netezzaCloudFiles));
         }catch (Exception e){
             log.error("[BackfillController.init]: ", e);
         }
