@@ -389,12 +389,12 @@ public class BackfillController {
         // Step 8 - convert google hotel file to Netezza file
         log.info("------------Executing Step 8------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath, "hotel");
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel"  + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "hotel" + "_001.csv", "hotel");
 
         // Step 9 - convert google flight file to Netezza file
         log.info("------------Executing Step 9------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
-        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath, "flight");
+        googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath+ "/ekv_flight"  + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "flight" + "_001.csv", "flight");
 
 
     }
