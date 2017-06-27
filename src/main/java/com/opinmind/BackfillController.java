@@ -381,6 +381,7 @@ public class BackfillController {
             log.info("------------Executing Step 7------------");
         while(DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat",".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+            break;
         }
             DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
