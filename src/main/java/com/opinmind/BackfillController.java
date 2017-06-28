@@ -181,6 +181,7 @@ public class BackfillController {
                     } else {
                         log.info("curYear and curYearMonth are same as endYear and endYearMonth");
                     }
+                    Thread.sleep(60000);
                 }
 
                 // run for the final month
@@ -342,21 +343,21 @@ public class BackfillController {
 
 
         // Step 1 - dumpEkvrawFromNetezza
-        log.info("------------Executing Step 1------------");
+        log.info("------------Executing Step 1 - dumpEkvrawFromNetezza------------");
         dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
 
         // Step 2 - processEkvrawToGenerateFastrackFile
-        log.info("------------Executing Step 2------------");
+        log.info("------------Executing Step 2 - processEkvrawToGenerateFastrackFile------------");
         processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
 
         // Step 3 - move fastrack file to udcuv2 inbox
-        log.info("------------Executing Step 3------------");
+        log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
         FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
 
 
         // Step 4 - make sure there is no files in following dirs
-        log.info("------------Executing Step 4------------");
+        log.info("------------Executing Step 4 - make sure there is no files in following dirs------------");
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
         dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
@@ -364,7 +365,7 @@ public class BackfillController {
         dirCleanThread("/opt/opinmind/var/udcuv2/archive");
 
         // Step 5 - to know the udcuv2 finish up processing the file
-        log.info("------------Executing Step 5------------");
+        log.info("------------Executing Step 5 - to know the udcuv2 finish up processing the file------------");
         while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox", ".force").length != 0) { // when inbox has no file, then udcuv2 finished
             // do nothing keep running
         }
@@ -372,7 +373,7 @@ public class BackfillController {
         // detectUdcuv2Finish("/opt/opinmind/var/google/ekvhotel/concat");
 
         // Step 6 - move hotel files
-        log.info("------------Executing Step 6------------");
+        log.info("------------Executing Step 6 - move hotel files------------");
         Thread.sleep(10000L);
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
@@ -384,7 +385,7 @@ public class BackfillController {
 
 
         // Step 7 - move flight files
-        log.info("------------Executing Step 7------------");
+        log.info("------------Executing Step 7 - move flight files------------");
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
         }
@@ -394,19 +395,22 @@ public class BackfillController {
         }
 
         // Step 8 - convert google hotel file to Netezza file
-        log.info("------------Executing Step 8------------");
+        log.info("------------Executing Step 8 - convert google hotel file to Netezza file------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
         if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudHotelFilePath, ".csv").length != 0) {
             googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "hotel" + "_001.csv", "hotel");
         }
 
         // Step 9 - convert google flight file to Netezza file
-        log.info("------------Executing Step 9------------");
+        log.info("------------Executing Step 9 - convert google flight file to Netezza file------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
         if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudFlightFilePath, ".csv").length != 0) {
             googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "flight" + "_001.csv", "flight");
         }
 
+        // Step 10 - stop all threads
+        log.info("------------Executing Step 10 - stop all threads------------");
+        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
     }
 
     private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
