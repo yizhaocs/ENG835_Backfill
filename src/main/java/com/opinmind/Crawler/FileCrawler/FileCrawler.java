@@ -19,7 +19,7 @@ public class FileCrawler implements Runnable {
     private final File root;
     private final ScheduledThreadPoolExecutor thread = new ScheduledThreadPoolExecutor(1);
     private final int workerWaitMilliseconds = 5000;
-    // private ConcurrentSkipListSet indexedFiles = new ConcurrentSkipListSet();
+    private ConcurrentSkipListSet indexedFiles = new ConcurrentSkipListSet();
 
     public FileCrawler(BlockingQueue fileQueue, final FileFilter fileFilter, File inputDir) {
 
@@ -51,10 +51,10 @@ public class FileCrawler implements Runnable {
 
         public void run() {
             if (Thread.currentThread().isInterrupted()) {
-                log.info("[FileCrawler.run] is interrupted, thread name is:" + Thread.currentThread().getName());
+                // log.info("[FileCrawler.run] is interrupted, thread name is:" + Thread.currentThread().getName());
                 return;
             }
-            log.info("[FileCrawler.run] is running, thread name is:" + Thread.currentThread().getName());
+            // log.info("[FileCrawler.run] is running, thread name is:" + Thread.currentThread().getName());
 
             File[] entries = file.listFiles(fileFilter);
 
@@ -63,9 +63,8 @@ public class FileCrawler implements Runnable {
                     if (entry.isDirectory()) {
                         // recursively
                         submitCrawlTask(entry);
-                    //} else if (entry != null && !indexedFiles.contains(entry)) {
-                    } else if (entry != null) {
-                        //indexedFiles.add(entry);
+                    } else if (entry != null && !indexedFiles.contains(entry)) {
+                        indexedFiles.add(entry);
                         try {
                             fileQueue.put(entry);
                         } catch (InterruptedException e) {

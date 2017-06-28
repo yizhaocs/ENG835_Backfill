@@ -30,7 +30,13 @@ public class FileProcessor implements Runnable {
         try {
             while (true) {
                 if (command.equals("delete")) {
-                    deleteFile(queue.take());
+                    File f = queue.take();
+                    int isDeleteSuccess = FileDeleteUtil.deleteFile(f);
+                    if(isDeleteSuccess != 0){
+                        log.info("[FileProcessor.run] file successfully deleted:" + f.getAbsolutePath());
+                    }else{
+                        log.info("[FileProcessor.run] file delete failed:" + f.getAbsolutePath());
+                    }
                 } else if (command.equals("foundNewFileInDir")) {
                     if (queue.size() != 0) {
                         BackfillController.getmMyWaitNotify().doNotify();
@@ -43,10 +49,6 @@ public class FileProcessor implements Runnable {
             System.out.println("Indexer Interrupted");
             Thread.currentThread().interrupt();
         }
-    }
-
-    public void deleteFile(File file) {
-        FileDeleteUtil.deleteFilesUnderDir(file.getAbsolutePath(), ".csv");
     }
 
     public void foundNewFileInDir(File file) {

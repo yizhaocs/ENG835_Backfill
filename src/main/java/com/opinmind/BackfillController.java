@@ -340,6 +340,7 @@ public class BackfillController {
         String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
 
 
+
         // Step 1 - dumpEkvrawFromNetezza
         log.info("------------Executing Step 1------------");
         dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
@@ -353,6 +354,7 @@ public class BackfillController {
         File file = new File(fastrackFileOutputPath);
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
         FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
+
 
         // Step 4 - make sure there is no files in following dirs
         log.info("------------Executing Step 4------------");
