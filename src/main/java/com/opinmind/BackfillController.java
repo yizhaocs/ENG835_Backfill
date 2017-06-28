@@ -374,7 +374,7 @@ public class BackfillController {
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6 - move hotel files------------");
-        Thread.sleep(10000L);
+        Thread.sleep(300000);
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
         }
