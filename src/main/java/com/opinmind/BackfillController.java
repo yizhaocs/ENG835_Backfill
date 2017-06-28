@@ -351,7 +351,6 @@ public class BackfillController {
 
         // Step 3 - move fastrack file to udcuv2 inbox
         log.info("------------Executing Step 3------------");
-        File file = new File(fastrackFileOutputPath);
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
         FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
 
@@ -374,6 +373,7 @@ public class BackfillController {
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
+        Thread.sleep(10000L);
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
         }
