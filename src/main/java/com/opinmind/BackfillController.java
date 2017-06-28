@@ -369,9 +369,8 @@ public class BackfillController {
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6------------");
-        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
+        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-            break;
         }
         DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/error", ".csv").length != 0) {
@@ -381,9 +380,8 @@ public class BackfillController {
 
         // Step 7 - move flight files
         log.info("------------Executing Step 7------------");
-        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat", ".csv").length != 0) {
+        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-            break;
         }
         DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/error", ".csv").length != 0) {
