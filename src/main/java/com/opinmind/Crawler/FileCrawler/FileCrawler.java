@@ -1,5 +1,7 @@
 package com.opinmind.Crawler.FileCrawler;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.concurrent.BlockingQueue;
@@ -11,6 +13,7 @@ import java.util.concurrent.TimeUnit;
  * Created by yzhao on 6/13/17.
  */
 public class FileCrawler implements Runnable {
+    private static final Logger log = Logger.getLogger(FileCrawler.class);
     private final BlockingQueue fileQueue;
     private final FileFilter fileFilter;
     private final File root;
@@ -48,8 +51,10 @@ public class FileCrawler implements Runnable {
 
         public void run() {
             if (Thread.currentThread().isInterrupted()) {
+                log.info("[FileCrawler.run] is interrupted, thread name is:" + Thread.currentThread().getName());
                 return;
             }
+            log.info("[FileCrawler.run] is running, thread name is:" + Thread.currentThread().getName());
 
             File[] entries = file.listFiles(fileFilter);
 
