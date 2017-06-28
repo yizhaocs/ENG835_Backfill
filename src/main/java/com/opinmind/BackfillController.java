@@ -164,6 +164,7 @@ public class BackfillController {
 
 
             if (endDate != null) {
+                unusedFileCLeanThread();
                 int count = 0;
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
@@ -181,7 +182,8 @@ public class BackfillController {
                     } else {
                         log.info("curYear and curYearMonth are same as endYear and endYearMonth");
                     }
-                    Thread.sleep(60000);
+                    log.info("Thread.sleep(60000)");
+                    // Thread.sleep(60000);
                 }
 
                 // run for the final month
@@ -191,6 +193,7 @@ public class BackfillController {
                 runBackfill(table, ekvrawFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
             }
         } else if (option.equals("r")) {
+            unusedFileCLeanThread();
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
@@ -354,6 +357,7 @@ public class BackfillController {
         log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
         File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
         FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
+/*
 
 
         // Step 4 - make sure there is no files in following dirs
@@ -363,6 +367,7 @@ public class BackfillController {
         dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
         dirCleanThread("/opt/opinmind/var/google/ekvraw/concat");
         dirCleanThread("/opt/opinmind/var/udcuv2/archive");
+*/
 
         // Step 5 - to know the udcuv2 finish up processing the file
         log.info("------------Executing Step 5 - to know the udcuv2 finish up processing the file------------");
@@ -374,6 +379,7 @@ public class BackfillController {
 
         // Step 6 - move hotel files
         log.info("------------Executing Step 6 - move hotel files------------");
+        log.info("Thread.sleep(300000)");
         Thread.sleep(300000);
         if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
             FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
@@ -408,9 +414,9 @@ public class BackfillController {
             googleCloudFileToNetezzaFileConvertor.process(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + "flight" + "_001.csv", "flight");
         }
 
-        // Step 10 - stop all threads
+        /*// Step 10 - stop all threads
         log.info("------------Executing Step 10 - stop all threads------------");
-        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);
+        ThreadUtil.stopAllThreads(threadPools, "BackfillMain", 5000L, TimeUnit.MILLISECONDS);*/
     }
 
     private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
@@ -479,6 +485,14 @@ public class BackfillController {
 
     public void setNetezzaConnector(NetezzaConnector netezzaConnector) {
         this.netezzaConnector = netezzaConnector;
+    }
+
+    private void unusedFileCLeanThread(){
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/concat");
+        dirCleanThread("/opt/opinmind/var/udcuv2/archive");
     }
 
     public void init() {
