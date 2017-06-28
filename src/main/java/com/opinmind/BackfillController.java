@@ -357,7 +357,10 @@ public class BackfillController {
         // Step 4 - make sure there is no files in following dirs
         log.info("------------Executing Step 4------------");
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+        dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
         dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+        dirCleanThread("/opt/opinmind/var/google/ekvraw/concat");
+        dirCleanThread("/opt/opinmind/var/udcuv2/archive");
 
         // Step 5 - to know the udcuv2 finish up processing the file
         log.info("------------Executing Step 5------------");
