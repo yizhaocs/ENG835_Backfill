@@ -161,8 +161,8 @@ public class BackfillController {
             log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
 
             if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL)) {
+                unusedFileCLeanThread();
                 if (endDate != null) {
-                    unusedFileCLeanThread();
                     String curYear = startYear;
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
@@ -177,6 +177,7 @@ public class BackfillController {
                     // only get one month
                     runBackfill(table, null, startYear, startYearMonth);
                 }
+                destroy();
             } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 if (endDate != null) {
                     String curYear = startYear;
