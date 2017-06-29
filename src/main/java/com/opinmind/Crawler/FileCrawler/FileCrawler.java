@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by yzhao on 6/13/17.
+ * @author YI ZHAO
  */
 public class FileCrawler implements Runnable {
     private static final Logger log = Logger.getLogger(FileCrawler.class);

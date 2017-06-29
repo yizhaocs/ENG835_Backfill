@@ -9,6 +9,9 @@ import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * @author YI ZHAO
+ */
 public class DirectorySannerMain {
     public static void main(String[] args) {
         File inputDir = new File("/Users/yzhao/Desktop/input");

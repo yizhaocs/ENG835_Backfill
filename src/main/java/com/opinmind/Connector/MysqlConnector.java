@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Created by yzhao on 5/24/17.
+ * @author YI ZHAO
  */
 public class MysqlConnector {
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";

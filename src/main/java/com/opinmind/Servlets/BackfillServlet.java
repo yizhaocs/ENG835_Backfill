@@ -34,6 +34,9 @@ import java.util.Arrays;
  * mode=convert
  * curl "http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition="
  */
+/**
+ * @author YI ZHAO
+ */
 public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
     private BackfillController backfillController;

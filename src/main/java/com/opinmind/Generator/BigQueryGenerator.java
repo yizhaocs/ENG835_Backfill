@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.util.Scanner;
 
 /**
- * Created by yzhao on 6/5/17.
+ * @author YI ZHAO
  */
 public class BigQueryGenerator {
     private static final Logger log = Logger.getLogger(BigQueryGenerator.class);
