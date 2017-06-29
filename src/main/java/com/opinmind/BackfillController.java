@@ -160,7 +160,7 @@ public class BackfillController {
         if (option.equals("d")) {
             log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
 
-            if (mode.equals(Constants.Mode.BACKFILL)) {
+            if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL)) {
                 if (endDate != null) {
                     unusedFileCLeanThread();
                     String curYear = startYear;

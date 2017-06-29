@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 /**
  * mode=testing_backfill
- * curl "http://localhost:8080/backfill/run?mode=testing_backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-01"
+ * curl "http://localhost:8080/backfill/run?mode=testing_backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
  */
 /**
  * mode=backfill
