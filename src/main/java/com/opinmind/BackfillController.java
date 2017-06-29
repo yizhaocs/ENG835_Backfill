@@ -167,10 +167,9 @@ public class BackfillController {
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                         runBackfill(table, null, curYear, curYearMonth);
-                        String yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
-                        String[] yearMonthStr = yearMonth.split("-");
-                        curYear = yearMonthStr[0];
-                        curYearMonth = yearMonthStr[1];
+                        String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        curYear = yearMonth[0];
+                        curYearMonth = yearMonth[1];
                     }
                     // run for the final month
                     runBackfill(table, null, curYear, curYearMonth);
@@ -184,10 +183,9 @@ public class BackfillController {
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                         runModedumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
-                        String yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
-                        String[] yearMonthStr = yearMonth.split("-");
-                        curYear = yearMonthStr[0];
-                        curYearMonth = yearMonthStr[1];
+                        String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        curYear = yearMonth[0];
+                        curYearMonth = yearMonth[1];
                     }
 
                     // run for the final month
@@ -363,7 +361,7 @@ public class BackfillController {
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
     }
 
-    private String curYearMonthPlusOne(String curYear, String curYearMonth, String endYear, String endYearMonth){
+    private String[] curYearMonthPlusOne(String curYear, String curYearMonth, String endYear, String endYearMonth){
         if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
             curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
         } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
@@ -374,7 +372,10 @@ public class BackfillController {
         } else {
             log.info("curYear and curYearMonth are same as endYear and endYearMonth");
         }
-        return curYear + "-" + curYearMonth;
+        String[] result = new String[2];
+        result[0] = curYear;
+        result[1] = curYearMonth;
+        return result;
     }
 
     public void setGoogleCloudFileToNetezzaFileConvertor(GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor) {
