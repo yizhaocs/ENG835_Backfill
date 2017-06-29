@@ -166,13 +166,11 @@ public class BackfillController {
 
             if (endDate != null) {
                 unusedFileCLeanThread();
-                int count = 0;
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                     runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
 
-                    count++;
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
                         curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
                     } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
@@ -183,8 +181,6 @@ public class BackfillController {
                     } else {
                         log.info("curYear and curYearMonth are same as endYear and endYearMonth");
                     }
-                    log.info("Thread.sleep(60000)");
-                    // Thread.sleep(60000);
                 }
 
                 // run for the final month
@@ -274,13 +270,11 @@ public class BackfillController {
 
 
             if (endDate != null) {
-                int count = 0;
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                    dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, null, curYear, curYearMonth);
 
-                    count++;
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
                         curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
                     } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
