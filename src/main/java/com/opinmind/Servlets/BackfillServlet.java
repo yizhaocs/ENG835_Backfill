@@ -95,7 +95,7 @@ public class BackfillServlet implements HttpRequestHandler {
                 type = req.getParameter("type");
 
                 log.info("[BackfillServlet.handleRequest] is going to execute runModeConvert" + "\n");
-                backfillController.runModeConvert(inputPath, outPutPath, monthYear, type);
+                backfillController.runModeConvert(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
             }
         } catch (Exception e) {
             log.error("[BackfillServlet.handleRequest]: ", e);
