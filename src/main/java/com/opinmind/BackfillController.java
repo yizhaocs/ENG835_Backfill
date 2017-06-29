@@ -89,7 +89,7 @@ public class BackfillController {
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
-    private String ekvrawFileOutputPath = DEFAULT_FILE_PATH + "ekvrawFile/";
+    public static String EKVRAW_FILE_PATH = DEFAULT_FILE_PATH + "ekvrawFile/ekvraw.csv";
     private String fastrackFileOutputPath = DEFAULT_FILE_PATH + "fastrackFile/";
     private String googleCloudFiles = DEFAULT_FILE_PATH + "processedFiles/googleCloud/";
     private String netezzaCloudFiles = DEFAULT_FILE_PATH + "processedFiles/netezza/";
@@ -140,10 +140,6 @@ public class BackfillController {
             }
         }
 
-
-        ekvrawFileOutputPath = table + "_ekvraw.csv";
-
-
         if (option.equals("d")) {
             log.info("startYear:" + startYear);
             log.info("startYearMonth:" + startYearMonth);
@@ -156,7 +152,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath);
+                    runBackfill(table, null, curYear, curYearMonth);
 
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
                         curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
@@ -171,23 +167,76 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath);
+                runBackfill(table, null, curYear, curYearMonth);
             } else {
                 // only get one month
-                runBackfill(table, ekvrawFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath);
+                runBackfill(table, null, startYear, startYearMonth);
             }
         } else if (option.equals("r")) {
             unusedFileCLeanThread();
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    runBackfill(table, ekvrawFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath);
+                    runBackfill(table, String.valueOf(i), null, null);
                     i++;
                 }
             } else {
-                runBackfill(table, ekvrawFileOutputPath, partition, null, null, fastrackFileOutputPath);
+                runBackfill(table, partition, null, null);
             }
         }
+    }
+
+    private void runBackfill(String table, String partition, String curYear, String curYearMonth) throws Exception {
+        log.info("[BackfillController.runBackfill] with table:" + table + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
+
+        String processedGoogleCloudHotelFilePath = googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
+        String processedNetezzaHotelFilePath = netezzaCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
+        String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
+
+
+        // Step 1 - dumpEkvrawFromNetezza
+        log.info("------------Executing Step 1 - dumpEkvrawFromNetezza------------");
+        dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
+
+        // Step 2 - processEkvrawToGenerateFastrackFile
+        log.info("------------Executing Step 2 - processEkvrawToGenerateFastrackFile------------");
+        processEkvrawToGenerateFastrackFile();
+
+        // Step 3 - move fastrack file to udcuv2 inbox
+        log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
+        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
+        FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
+
+        // Step 4 - to know the udcuv2 finish up processing the file
+        log.info("------------Executing Step 4 - to know the udcuv2 finish up processing the file------------");
+        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox", ".force").length != 0) { // when inbox has no file, then udcuv2 finished
+            // do nothing keep running
+        }
+
+        // Step 5 - move hotel files
+        log.info("------------Executing Step 5 - move hotel files------------");
+        log.info("Thread.sleep(300000)");
+        Thread.sleep(300000);
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
+
+        // Step 6 - move flight files
+        log.info("------------Executing Step 6 - move flight files------------");
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
+        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
+
+        // Step 7 - convert google hotel file to Netezza file
+        log.info("------------Executing Step 7 - convert google hotel file to Netezza file------------");
+        DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
+        runModeConvert(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.HOTEL + "_001.csv", Constants.Type.HOTEL);
+
+        // Step 8 - convert google flight file to Netezza file
+        log.info("------------Executing Step 8 - convert google flight file to Netezza file------------");
+        DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
+        runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
     }
 
     public void runModeDumpEKVraw(String option, String table, String startDate, String endDate, String partition) throws Exception {
@@ -230,8 +279,6 @@ public class BackfillController {
             }
         }
 
-        ekvrawFileOutputPath = table + "_ekvraw.csv";
-
         if (option.equals("d")) {
             log.info("startYear:" + startYear);
             log.info("startYearMonth:" + startYearMonth);
@@ -243,7 +290,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, null, curYear, curYearMonth);
+                    dumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
 
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
                         curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
@@ -258,75 +305,22 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, curYear, curYearMonth);
+                dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
             } else {
                 // only get one month
-                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, startYear, startYearMonth);
+                dumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
             }
         } else if (option.equals("r")) {
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, String.valueOf(i), null, null);
+                    dumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
                     i++;
                 }
             } else {
-                dumpEkvrawFromNetezza(table, ekvrawFileOutputPath, partition, null, null);
+                dumpEkvrawFromNetezza(table, partition, null, null);
             }
         }
-    }
-
-    private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath) throws Exception {
-        log.info("[BackfillController.runBackfill] with table:" + table + " ,csvFileOutputPath:" + csvFileOutputPath + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth + " ,fastrackFileOutputPath:" + fastrackFileOutputPath);
-
-        String processedGoogleCloudHotelFilePath = googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
-        String processedNetezzaHotelFilePath = netezzaCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
-        String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
-
-
-        // Step 1 - dumpEkvrawFromNetezza
-        log.info("------------Executing Step 1 - dumpEkvrawFromNetezza------------");
-        dumpEkvrawFromNetezza(table, csvFileOutputPath, partition, curYear, curYearMonth);
-
-        // Step 2 - processEkvrawToGenerateFastrackFile
-        log.info("------------Executing Step 2 - processEkvrawToGenerateFastrackFile------------");
-        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath);
-
-        // Step 3 - move fastrack file to udcuv2 inbox
-        log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
-        File toDirectory = new File("/opt/opinmind/var/udcuv2/inbox");
-        FileMoveUtil.moveFilesUnderDir(fastrackFileOutputPath, ".force", toDirectory);
-
-        // Step 4 - to know the udcuv2 finish up processing the file
-        log.info("------------Executing Step 4 - to know the udcuv2 finish up processing the file------------");
-        while (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/udcuv2/inbox", ".force").length != 0) { // when inbox has no file, then udcuv2 finished
-            // do nothing keep running
-        }
-
-        // Step 5 - move hotel files
-        log.info("------------Executing Step 5 - move hotel files------------");
-        log.info("Thread.sleep(300000)");
-        Thread.sleep(300000);
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
-
-        // Step 6 - move flight files
-        log.info("------------Executing Step 6 - move flight files------------");
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-        DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
-
-        // Step 7 - convert google hotel file to Netezza file
-        log.info("------------Executing Step 7 - convert google hotel file to Netezza file------------");
-        DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
-        runModeConvert(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.HOTEL + "_001.csv", Constants.Type.HOTEL);
-
-        // Step 8 - convert google flight file to Netezza file
-        log.info("------------Executing Step 8 - convert google flight file to Netezza file------------");
-        DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
-        runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
     }
 
     public void runModeConvert(String inputPath, String outPutPath, String type) throws Exception {
@@ -353,16 +347,16 @@ public class BackfillController {
         googleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath, type);
     }
 
-    private void dumpEkvrawFromNetezza(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth) throws Exception {
+    private void dumpEkvrawFromNetezza(String table, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
-            netezzaConnector.dataToCsvPartitionByYearMonth(table, csvFileOutputPath, curYear, curYearMonth);
+            netezzaConnector.dataToCsvPartitionByYearMonth(table, curYear, curYearMonth);
         } else {
-            netezzaConnector.dataToCsvPartitionByMod(table, csvFileOutputPath, partition);
+            netezzaConnector.dataToCsvPartitionByMod(table, partition);
         }
     }
 
-    private void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath) throws Exception{
+    private void processEkvrawToGenerateFastrackFile() throws Exception{
         log.info("done with ekv raws to CSV file \n");
         /**
          * hostName has startwith properties:
@@ -380,13 +374,13 @@ public class BackfillController {
 
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = DateCalendar.getUnixTimeStamp();
-        ekvrawToFastrackFileConvertor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
+        ekvrawToFastrackFileConvertor.execute(EKVRAW_FILE_PATH, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         log.info("done with CSV file to fastrack file\n");
-        File f = new File(csvFileOutputPath);
+        File f = new File(EKVRAW_FILE_PATH);
         if (FileDeleteUtil.deleteFile(f) == 1) {
-            log.info(csvFileOutputPath + " has deleted" + "\n");
+            log.info(EKVRAW_FILE_PATH + " has deleted" + "\n");
         } else {
-            log.info(csvFileOutputPath + " has failed to delete" + "\n");
+            log.info(EKVRAW_FILE_PATH + " has failed to delete" + "\n");
         }
     }
 
@@ -439,7 +433,7 @@ public class BackfillController {
 
         try {
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
-            DirCreateUtil.createDirectory(new File(ekvrawFileOutputPath));
+            DirCreateUtil.createDirectory(new File(EKVRAW_FILE_PATH));
             DirCreateUtil.createDirectory(new File(fastrackFileOutputPath));
             DirCreateUtil.createDirectory(new File(googleCloudFiles));
             DirCreateUtil.createDirectory(new File(netezzaCloudFiles));

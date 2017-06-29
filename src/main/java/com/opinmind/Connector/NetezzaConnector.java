@@ -1,5 +1,6 @@
 package com.opinmind.Connector;
 
+import com.opinmind.BackfillController;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -17,13 +18,13 @@ public class NetezzaConnector {
     private String DB_USER;
     private String DB_PASSWORD;
 
-    public void dataToCsvPartitionByMod(String table, String csvFileOutputPath, String partition) throws SQLException {
+    public void dataToCsvPartitionByMod(String table, String partition) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
         String selectTableSQL = null;
 
-        selectTableSQL = "create external table \'" + csvFileOutputPath + "\'" +
+        selectTableSQL = "create external table \'" + BackfillController.EKVRAW_FILE_PATH + "\'" +
                 "\n" +
                 "using (delim '|' escapechar '\\' remoteSource 'JDBC')" +
                 "\n" +
@@ -54,13 +55,13 @@ public class NetezzaConnector {
         }
     }
 
-    public void dataToCsvPartitionByYearMonth(String table, String csvFileOutputPath, String year, String month) throws SQLException {
+    public void dataToCsvPartitionByYearMonth(String table, String year, String month) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
         String selectTableSQL = null;
 
-        selectTableSQL = "create external table \'" + csvFileOutputPath + "\'" +
+        selectTableSQL = "create external table \'" + BackfillController.EKVRAW_FILE_PATH + "\'" +
                 "\n" +
                 "using (delim '|' escapechar '\\' remoteSource 'JDBC')" +
                 "\n" +
