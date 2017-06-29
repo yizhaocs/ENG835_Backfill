@@ -294,10 +294,12 @@ public class BackfillController {
             File f = new File(EKVRAW_FILE_PATH);
             if(f.exists()) {
                 if (FileDeleteUtil.deleteFile(f) == 1) {
-                    log.info(EKVRAW_FILE_PATH + " has deleted" + "\n");
+                    log.info(EKVRAW_FILE_PATH + " has deleted");
                 } else {
-                    log.info(EKVRAW_FILE_PATH + " has failed to delete" + "\n");
+                    log.info(EKVRAW_FILE_PATH + " has failed to delete");
                 }
+            }else{
+                log.info(EKVRAW_FILE_PATH + " does not exist");
             }
         }
     }
