@@ -167,7 +167,10 @@ public class BackfillController {
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                         runBackfill(table, null, curYear, curYearMonth);
-                        curYearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        String yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        String[] yearMonthStr = yearMonth.split("-");
+                        curYear = yearMonthStr[0];
+                        curYearMonth = yearMonthStr[1];
                     }
                     // run for the final month
                     runBackfill(table, null, curYear, curYearMonth);
@@ -181,7 +184,10 @@ public class BackfillController {
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
                         runModedumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
-                        curYearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        String yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                        String[] yearMonthStr = yearMonth.split("-");
+                        curYear = yearMonthStr[0];
+                        curYearMonth = yearMonthStr[1];
                     }
 
                     // run for the final month
@@ -368,7 +374,7 @@ public class BackfillController {
         } else {
             log.info("curYear and curYearMonth are same as endYear and endYearMonth");
         }
-        return curYearMonth;
+        return curYear + "-" + curYearMonth;
     }
 
     public void setGoogleCloudFileToNetezzaFileConvertor(GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor) {
