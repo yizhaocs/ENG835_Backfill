@@ -81,6 +81,7 @@ public class BackfillServlet implements HttpRequestHandler {
 
                 log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw");
                 backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition, sendEmail);
+                sendEmail.send(table, null, null, null,true);
             }else if (mode.equals(Constants.Mode.EKVRAW_TO_FASTRACK)) {
                 String deleteEKVRAW = req.getParameter("deleteEKVRAW");
                 if(deleteEKVRAW.equals("1")){

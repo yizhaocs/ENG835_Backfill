@@ -19,7 +19,7 @@ import java.util.Properties;
 public class SendEmail {
     public static void main(String[] args){
         SendEmail sendEmail = new SendEmail();
-        sendEmail.send("test", null, "12", "13");
+        sendEmail.send("test", null, "12", "13", false);
     }
 
     private static Logger log = Logger.getLogger("SendEmail.class");
@@ -32,7 +32,7 @@ public class SendEmail {
     private final String user = "backfillticket@gmail.com";
     private final String password = "backfill123";
 
-    public void send(String table, String partition, String curYear, String curYearMonth){
+    public void send(String table, String partition, String curYear, String curYearMonth, boolean isFinishedAll){
         // Get system properties
         Properties properties = System.getProperties();
 
@@ -58,9 +58,14 @@ public class SendEmail {
             message.addRecipients(Message.RecipientType.TO, recipients);
 
             // Set Subject: header field
-            message.setSubject("Finished backfilling for table:" + table + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
-            // Now set the actual message
-            message.setText("Finished backfilling for table:" + table + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
+            if(!isFinishedAll) {
+                message.setSubject("Finished backfilling for table:" + table + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
+                // Now set the actual message
+                message.setText("Finished backfilling for table:" + table + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
+            }else{
+                message.setSubject("Finished all backfilling for table:" + table);
+                message.setText("Finished all backfilling for table:" + table);
+            }
             // Send message
             Transport.send(message);
         } catch (AddressException e) {

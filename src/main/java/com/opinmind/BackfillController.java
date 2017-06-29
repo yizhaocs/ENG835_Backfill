@@ -139,16 +139,16 @@ public class BackfillController {
                         String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
                         curYear = yearMonth[0];
                         curYearMonth = yearMonth[1];
-                        sendEmail.send(table, null, curYear, curYearMonth);
+                        sendEmail.send(table, null, curYear, curYearMonth, false);
 
                     }
                     // run for the final month
                     runBackfill(table, null, curYear, curYearMonth);
-                    sendEmail.send(table, null, startYear, startYearMonth);
+                    sendEmail.send(table, null, startYear, startYearMonth, false);
                 } else {
                     // only get one month
                     runBackfill(table, null, startYear, startYearMonth);
-                    sendEmail.send(table, null, startYear, startYearMonth);
+                    sendEmail.send(table, null, startYear, startYearMonth, false);
                 }
                 destroy();
             } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
