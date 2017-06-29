@@ -10,6 +10,7 @@ import com.opinmind.Converter.EkvrawToFastrackFileConvertor;
 import com.opinmind.Crawler.FileCrawler.FileCrawler;
 import com.opinmind.Crawler.FileFilter.fastrackFileFilter;
 import com.opinmind.Crawler.FileProcessor.FileProcessor;
+import com.opinmind.Util.EmailUtils.SendEmail;
 import com.opinmind.Util.FileUtils.DirCreateUtil;
 import com.opinmind.Util.FileUtils.DirGetAllFiles;
 import com.opinmind.Util.FileUtils.FileDeleteUtil;
@@ -64,6 +65,7 @@ public class BackfillController {
     private NetezzaConnector netezzaConnector = null;
     private String mode = null;
 
+
     public static MyWaitNotify getmMyWaitNotify() {
         return mMyWaitNotify;
     }
@@ -78,7 +80,7 @@ public class BackfillController {
      * @param partition
      * @throws Exception
      */
-    public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition) throws Exception {
+    public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition, SendEmail sendEmail) throws Exception {
         if (mode == null) {
             log.error("mode is null");
             return;
@@ -137,12 +139,16 @@ public class BackfillController {
                         String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
                         curYear = yearMonth[0];
                         curYearMonth = yearMonth[1];
+                        sendEmail.send(table, null, curYear, curYearMonth);
+
                     }
                     // run for the final month
                     runBackfill(table, null, curYear, curYearMonth);
+                    sendEmail.send(table, null, startYear, startYearMonth);
                 } else {
                     // only get one month
                     runBackfill(table, null, startYear, startYearMonth);
+                    sendEmail.send(table, null, startYear, startYearMonth);
                 }
                 destroy();
             } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {

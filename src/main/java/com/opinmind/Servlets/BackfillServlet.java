@@ -2,6 +2,7 @@ package com.opinmind.Servlets;
 
 import com.opinmind.BackfillController;
 import com.opinmind.Util.Constants;
+import com.opinmind.Util.EmailUtils.SendEmail;
 import org.apache.log4j.Logger;
 import org.springframework.web.HttpRequestHandler;
 
@@ -40,6 +41,7 @@ import java.util.Arrays;
 public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
     private BackfillController backfillController;
+    private SendEmail sendEmail = new SendEmail();
 
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -78,7 +80,7 @@ public class BackfillServlet implements HttpRequestHandler {
                 }
 
                 log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw");
-                backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition);
+                backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition, sendEmail);
             }else if (mode.equals(Constants.Mode.EKVRAW_TO_FASTRACK)) {
                 String deleteEKVRAW = req.getParameter("deleteEKVRAW");
                 if(deleteEKVRAW.equals("1")){
@@ -98,6 +100,7 @@ public class BackfillServlet implements HttpRequestHandler {
         } catch (Exception e) {
             log.error("[BackfillServlet.handleRequest]: ", e);
         }
+
     }
 
     public void setBackfillController(BackfillController backfillController) {
