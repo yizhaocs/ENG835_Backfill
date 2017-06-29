@@ -18,7 +18,8 @@ import java.util.Arrays;
  */
 /**
  * mode=backfill
- * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2016-05"
+ * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
+ * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2017-03"
  */
 /**
  * mode=dump_ekvraw
@@ -32,38 +33,6 @@ import java.util.Arrays;
 /**
  * mode=convert
  * curl "http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition="
- */
-
-/**
- * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2016-05"
- * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-01"
- * curl "http://localhost:8080/backfill/run?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
- * curl "http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition="
- * testing:
- * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_Testing&startDate=2016-12&endDate=2017-02"
- *
- *
- * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_Testing&startDate=2016-12&endDate=2017-02"
-
-
- CREATE TABLE ENG759_BACKFILL_Testing AS(
- SELECT EKV.EVENT_ID, EKV.KEY_ID, EKV.VALUE, EKV.COOKIE_ID, EKV.DP_ID, EKV.LOCATION_ID, EKV.MODIFICATION_TS
- FROM ENG759_BACKFILL_APAC AS EKV
- WHERE  MODIFICATION_TS = '2016-12-19'
- ORDER BY EKV.EVENT_ID
- LIMIT 2000);
-
- INSERT INTO ENG759_BACKFILL_Testing
- SELECT * FROM ENG759_BACKFILL_APAC
- WHERE  MODIFICATION_TS = '2017-01-19'
- ORDER BY EVENT_ID
- LIMIT 2000;
-
- INSERT INTO ENG759_BACKFILL_Testing
- SELECT * FROM ENG759_BACKFILL_APAC
- WHERE  MODIFICATION_TS = '2017-02-19'
- ORDER BY EVENT_ID
- LIMIT 2000;
  */
 public class BackfillServlet implements HttpRequestHandler {
     private static final Logger log = Logger.getLogger(BackfillServlet.class);
