@@ -310,21 +310,6 @@ public class BackfillController {
     }
 
     public void runModeConvert(String inputPath, String outPutPath, String type) throws Exception {
-        if (inputPath == null) {
-            log.error("[BackfillController.runModeConvert]: inputPath is null");
-            return;
-        }
-
-        if (outPutPath == null) {
-            log.error("[BackfillController.runModeConvert]: outPutPath is null");
-            return;
-        }
-
-        if (type == null) {
-            log.error("[BackfillController.runModeConvert]: type is null");
-            return;
-        }
-
         if (DirGetAllFiles.getAllFilesInDir(inputPath, ".csv").length == 0) {
             log.info("[BackfillController.runModeConvert] inputPath:" + inputPath + " with fileEndWith:" + ".csv" + " is empty");
             return;
