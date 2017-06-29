@@ -109,7 +109,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("[GoogleCloudFileToNetezzaFileConvertor.readDirAndWriteToOutput]: ", e);
                 }
             }
         }
