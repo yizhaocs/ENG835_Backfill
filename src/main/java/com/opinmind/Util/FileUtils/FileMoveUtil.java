@@ -26,6 +26,10 @@ public class FileMoveUtil {
      * @param toDirectory
      */
     public static void moveFilesUnderDir(String rootPath, final String fileEndWith, File toDirectory) throws IOException {
+        if (DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith).length == 0) {
+            logger.info("[FileMoveUtil.moveFilesUnderDir] rootPath:" + rootPath + " with fileEndWith:" + fileEndWith + " is empty");
+            return;
+        }
         File[] files = DirGetAllFiles.getAllFilesInDir(rootPath, fileEndWith);
         logger.info("[FileMoveUtil.moveFilesUnderDir] is moving total:" + files.length + " files from" + rootPath + " to " + toDirectory.getAbsolutePath());
         for (File f : files) {

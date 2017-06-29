@@ -338,53 +338,46 @@ public class BackfillController {
         log.info("------------Executing Step 5 - move hotel files------------");
         log.info("Thread.sleep(300000)");
         Thread.sleep(300000);
-        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv").length != 0) {
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
-        }
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
         DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
-        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvhotel/error", ".csv").length != 0) {
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
-        }
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
 
 
         // Step 6 - move flight files
         log.info("------------Executing Step 6 - move flight files------------");
-        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/concat", ".csv").length != 0) {
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
-        }
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/concat", ".csv", new File("/opt/opinmind/var/google/ekvflight/error"));
         DirCreateUtil.createDirectory(new File(processedGoogleCloudFlightFilePath));
-        if (DirGetAllFiles.getAllFilesInDir("/opt/opinmind/var/google/ekvflight/error", ".csv").length != 0) {
-            FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
-        }
+        FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvflight/error", ".csv", new File(processedGoogleCloudFlightFilePath));
 
         // Step 7 - convert google hotel file to Netezza file
         log.info("------------Executing Step 7 - convert google hotel file to Netezza file------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaHotelFilePath));
-        if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudHotelFilePath, ".csv").length != 0) {
-            runModeConvert(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.HOTEL + "_001.csv", Constants.Type.HOTEL);
-        }
+        runModeConvert(processedGoogleCloudHotelFilePath, processedNetezzaHotelFilePath + "/ekv_hotel" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.HOTEL + "_001.csv", Constants.Type.HOTEL);
 
         // Step 8 - convert google flight file to Netezza file
         log.info("------------Executing Step 8 - convert google flight file to Netezza file------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
-        if (DirGetAllFiles.getAllFilesInDir(processedGoogleCloudFlightFilePath, ".csv").length != 0) {
-            runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
-        }
+        runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
     }
 
     public void runModeConvert(String inputPath, String outPutPath, String type) throws Exception {
         if (inputPath == null) {
-            log.error("inputPath is null");
+            log.error("[BackfillController.runModeConvert]: inputPath is null");
             return;
         }
 
         if (outPutPath == null) {
-            log.error("outPutPath is null");
+            log.error("[BackfillController.runModeConvert]: outPutPath is null");
             return;
         }
 
         if (type == null) {
-            log.error("type is null");
+            log.error("[BackfillController.runModeConvert]: type is null");
+            return;
+        }
+
+        if (DirGetAllFiles.getAllFilesInDir(inputPath, ".csv").length == 0) {
+            log.info("[BackfillController.runModeConvert] inputPath:" + inputPath  + " with fileEndWith:" + ".csv" + " is empty");
             return;
         }
 
