@@ -178,15 +178,15 @@ public class BackfillController {
                     String curYear = startYear;
                     String curYearMonth = startYearMonth;
                     while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                        dumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
+                        runModedumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
                         curYearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
                     }
 
                     // run for the final month
-                    dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
+                    runModedumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
                 } else {
                     // only get one month
-                    dumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
+                    runModedumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
                 }
             }
         } else if (option.equals("r")) {
@@ -205,11 +205,11 @@ public class BackfillController {
                 if (partition == null) {
                     int i = 0;
                     while (i < 10) {
-                        dumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
+                        runModedumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
                         i++;
                     }
                 } else {
-                    dumpEkvrawFromNetezza(table, partition, null, null);
+                    runModedumpEkvrawFromNetezza(table, partition, null, null);
                 }
             }
         }
@@ -224,13 +224,13 @@ public class BackfillController {
         String processedNetezzaFlightFilePath = netezzaCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
 
 
-        // Step 1 - dumpEkvrawFromNetezza
-        log.info("------------Executing Step 1 - dumpEkvrawFromNetezza------------");
-        dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
+        // Step 1 - runModedumpEkvrawFromNetezza
+        log.info("------------Executing Step 1 - runModedumpEkvrawFromNetezza------------");
+        runModedumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
 
-        // Step 2 - processEkvrawToGenerateFastrackFile
-        log.info("------------Executing Step 2 - processEkvrawToGenerateFastrackFile------------");
-        processEkvrawToGenerateFastrackFile(true);
+        // Step 2 - runModeEkvrawToFastrack
+        log.info("------------Executing Step 2 - runModeEkvrawToFastrack------------");
+        runModeEkvrawToFastrack(true);
 
         // Step 3 - move fastrack file to udcuv2 inbox
         log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
@@ -268,7 +268,7 @@ public class BackfillController {
         runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
     }
 
-    public void processEkvrawToGenerateFastrackFile(boolean deleteEKVRAW) throws Exception {
+    public void runModeEkvrawToFastrack(boolean deleteEKVRAW) throws Exception {
         /**
          * hostName has startwith properties:
          *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
@@ -322,7 +322,7 @@ public class BackfillController {
         googleCloudFileToNetezzaFileConvertor.process(inputPath, outPutPath, type);
     }
 
-    private void dumpEkvrawFromNetezza(String table, String partition, String curYear, String curYearMonth) throws Exception {
+    private void runModedumpEkvrawFromNetezza(String table, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
             netezzaConnector.dataToCsvPartitionByYearMonth(table, curYear, curYearMonth);

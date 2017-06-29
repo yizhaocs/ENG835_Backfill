@@ -108,9 +108,9 @@ public class BackfillServlet implements HttpRequestHandler {
             }else if (mode.equals(Constants.Mode.EKVRAW_TO_FASTRACK)) {
                 String deleteEKVRAW = req.getParameter("deleteEKVRAW");
                 if(deleteEKVRAW.equals("1")){
-                    backfillController.processEkvrawToGenerateFastrackFile(true);
+                    backfillController.runModeEkvrawToFastrack(true);
                 }else{
-                    backfillController.processEkvrawToGenerateFastrackFile(false);
+                    backfillController.runModeEkvrawToFastrack(false);
                 }
             } else if (mode.equals(Constants.Mode.CONVERT)) {
                 inputPath = req.getParameter("inputPath");
