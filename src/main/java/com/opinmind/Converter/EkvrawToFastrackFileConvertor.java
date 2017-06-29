@@ -58,7 +58,7 @@ public class EkvrawToFastrackFileConvertor {
                 String line = s.nextLine();
                 String[] str = st.reset(line).getTokenArray();
                 if (str.length != 7) {
-                    log.info("str.length != 7 at the line:" + line);
+                    log.info("[EkvrawToFastrackFileConvertor.execute] str.length != 7 at the line:" + line);
                     continue;
                 }
                 String event_id = str[0];
@@ -79,9 +79,7 @@ public class EkvrawToFastrackFileConvertor {
                     try {
                         date = dateFormatTmp.parse(modification_ts);
                     } catch (Exception e2) {
-                        log.error("error data format event_id:" + event_id + " ,modification_ts:" + modification_ts + "\n");
-                        log.error("Exception in FastrackFileProcessor:" + "\n");
-                        e2.printStackTrace();
+                        log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
                     }
                 }
                 long modification_ts_unixTime = DateUtil.dateToUnixTime(date);
@@ -124,7 +122,7 @@ public class EkvrawToFastrackFileConvertor {
         } catch (Exception e) {
             log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
         } finally {
-            log.info("Total row generated for fastrack is:" + rowCount + "\n");
+            log.info("Total row generated for fastrack is:" + rowCount);
             if (s != null) {
                 s.close();
             }
@@ -134,7 +132,7 @@ public class EkvrawToFastrackFileConvertor {
                     out.close();
                 }
             } catch (IOException e) {
-                log.error("Caught IOException: " + e.getMessage());
+                log.error("[EkvrawToFastrackFileConvertor.execute]: ", e);
             }
         }
     }
@@ -144,11 +142,11 @@ public class EkvrawToFastrackFileConvertor {
     }
 
     public void init() {
-
+        log.info("[EkvrawToFastrackFileConvertor.init]");
     }
 
 
     public void destroy() {
-
+        log.info("[EkvrawToFastrackFileConvertor.destroy]");
     }
 }

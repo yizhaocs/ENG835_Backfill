@@ -53,14 +53,14 @@ public class BackfillServlet implements HttpRequestHandler {
         String monthYear = null;
         String type = null; // hotel or flight
 
-        log.info("[BackfillServlet.handleRequest] getParameterMap:" + "\n");
+        log.info("[BackfillServlet.handleRequest] getParameterMap:");
         for(String s: req.getParameterMap().keySet()){
             String[] value = req.getParameterMap().get(s);
-            log.info(s + "=" + Arrays.toString(value) + "\n");
+            log.info(s + "=" + Arrays.toString(value));
         }
 
         if (mode == null) {
-            log.error("[BackfillServlet.handleRequest] mode is null " + "\n");
+            log.error("[BackfillServlet.handleRequest] mode is null ");
             return;
         }
 
@@ -74,7 +74,7 @@ public class BackfillServlet implements HttpRequestHandler {
                     partition = req.getParameter("partition");
                 }
 
-                log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw" + "\n");
+                log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw");
                 backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition);
             }else if (mode.equals(Constants.Mode.EKVRAW_TO_FASTRACK)) {
                 String deleteEKVRAW = req.getParameter("deleteEKVRAW");
@@ -89,7 +89,7 @@ public class BackfillServlet implements HttpRequestHandler {
                 monthYear = req.getParameter("monthYear");
                 type = req.getParameter("type");
 
-                log.info("[BackfillServlet.handleRequest] is going to execute runModeConvert" + "\n");
+                log.info("[BackfillServlet.handleRequest] is going to execute runModeConvert");
                 backfillController.runModeConvert(inputPath, outPutPath + "/ekv_" + type + "_all_netezza-" + monthYear + "_" + type + "_001.csv", type);
             }
         } catch (Exception e) {

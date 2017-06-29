@@ -99,7 +99,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 log.info("begin of converting file:" + file.getName());
                 if (file.isFile() && file.getName().endsWith(".csv")) {
                     int count = readFile(out, file, type);
-                    log.info("end of converting file with total converted count:" + count + "\n");
+                    log.info("end of converting file with total converted count:" + count);
                 }
             }
         } catch (Exception e) {
@@ -130,7 +130,7 @@ public class GoogleCloudFileToNetezzaFileConvertor {
                 count++;
             }
         } catch (Exception e) {
-            log.info("failed to parseJason:" + line);
+            log.info("[GoogleCloudFileToNetezzaFileConvertor.readFile] failed to parseJason:" + line);
         } finally {
             if (s != null) {
                 s.close();
