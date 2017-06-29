@@ -143,19 +143,6 @@ public class BackfillController {
 
         ekvrawFileOutputPath = table + "_ekvraw.csv";
 
-        /**
-         * hostName has startwith properties:
-         *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-         */
-
-        String CurrentHostName = InetAddress.getLocalHost().getHostName();
-        String fileHostName = null;
-        // hdu.include.only.sources in common.properties
-        if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
-            fileHostName = "qa1-ps1-lax1";
-        } else {
-            fileHostName = "ps";
-        }
 
         if (option.equals("d")) {
             log.info("startYear:" + startYear);
@@ -169,7 +156,7 @@ public class BackfillController {
                 String curYear = startYear;
                 String curYearMonth = startYearMonth;
                 while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath);
 
                     if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
                         curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
@@ -184,21 +171,21 @@ public class BackfillController {
                 }
 
                 // run for the final month
-                runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, null, curYear, curYearMonth, fastrackFileOutputPath);
             } else {
                 // only get one month
-                runBackfill(table, ekvrawFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, null, startYear, startYearMonth, fastrackFileOutputPath);
             }
         } else if (option.equals("r")) {
             unusedFileCLeanThread();
             if (partition == null) {
                 int i = 0;
                 while (i < 10) {
-                    runBackfill(table, ekvrawFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath, fileHostName);
+                    runBackfill(table, ekvrawFileOutputPath, String.valueOf(i), null, null, fastrackFileOutputPath);
                     i++;
                 }
             } else {
-                runBackfill(table, ekvrawFileOutputPath, partition, null, null, fastrackFileOutputPath, fileHostName);
+                runBackfill(table, ekvrawFileOutputPath, partition, null, null, fastrackFileOutputPath);
             }
         }
     }
@@ -241,26 +228,9 @@ public class BackfillController {
                 endYear = endYearDateStr[0];
                 endYearMonth = endYearDateStr[1];
             }
-
-
         }
-
 
         ekvrawFileOutputPath = table + "_ekvraw.csv";
-
-        /**
-         * hostName has startwith properties:
-         *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
-         */
-
-        String CurrentHostName = InetAddress.getLocalHost().getHostName();
-        String fileHostName = null;
-        // hdu.include.only.sources in common.properties
-        if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
-            fileHostName = "qa1-ps1-lax1";
-        } else {
-            fileHostName = "ps";
-        }
 
         if (option.equals("d")) {
             log.info("startYear:" + startYear);
@@ -306,8 +276,8 @@ public class BackfillController {
         }
     }
 
-    private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath, String fileHostName) throws Exception {
-        log.info("[BackfillController.runBackfill] with table:" + table + " ,csvFileOutputPath:" + csvFileOutputPath + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth + " ,fastrackFileOutputPath:" + fastrackFileOutputPath + " ,fileHostName:" + fileHostName);
+    private void runBackfill(String table, String csvFileOutputPath, String partition, String curYear, String curYearMonth, String fastrackFileOutputPath) throws Exception {
+        log.info("[BackfillController.runBackfill] with table:" + table + " ,csvFileOutputPath:" + csvFileOutputPath + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth + " ,fastrackFileOutputPath:" + fastrackFileOutputPath);
 
         String processedGoogleCloudHotelFilePath = googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
         String processedGoogleCloudFlightFilePath = googleCloudFiles + table + "/flight/" + curYear + "-" + curYearMonth;
@@ -321,7 +291,7 @@ public class BackfillController {
 
         // Step 2 - processEkvrawToGenerateFastrackFile
         log.info("------------Executing Step 2 - processEkvrawToGenerateFastrackFile------------");
-        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath, fileHostName);
+        processEkvrawToGenerateFastrackFile(csvFileOutputPath, fastrackFileOutputPath);
 
         // Step 3 - move fastrack file to udcuv2 inbox
         log.info("------------Executing Step 3 - move fastrack file to udcuv2 inbox------------");
@@ -341,7 +311,6 @@ public class BackfillController {
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/concat", ".csv", new File("/opt/opinmind/var/google/ekvhotel/error"));
         DirCreateUtil.createDirectory(new File(processedGoogleCloudHotelFilePath));
         FileMoveUtil.moveFilesUnderDir("/opt/opinmind/var/google/ekvhotel/error", ".csv", new File(processedGoogleCloudHotelFilePath));
-
 
         // Step 6 - move flight files
         log.info("------------Executing Step 6 - move flight files------------");
@@ -393,11 +362,24 @@ public class BackfillController {
         }
     }
 
-    private void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath, String fileHostName) {
+    private void processEkvrawToGenerateFastrackFile(String csvFileOutputPath, String fastrackFileOutputPath) throws Exception{
         log.info("done with ekv raws to CSV file \n");
+        /**
+         * hostName has startwith properties:
+         *  hdu.include.only.sources=localhost,dmining,modata,ps,ag,bidder,udcuweb,qa1-ps1,qa-yoweb1,qa2-ps1,qa2-yoweb1,qa4-ps1,qa4-yoweb1,qa-ag1,qa2-ag1,qa4-ag1,qa-bidder,qa2-bidder,qa4-bidder,qa-googlebidder,qa-googlebid,qa2-googlebid,qa4-googlebid,qa1-modata1,qa2-modata1,qa4-modata1
+         */
+        String CurrentHostName = InetAddress.getLocalHost().getHostName();
+        String fileHostName = null;
+        // hdu.include.only.sources in common.properties
+        if (CurrentHostName.contains("qa") || CurrentHostName.contains("manager")) {
+            fileHostName = "qa1-ps1-lax1";
+        } else {
+            fileHostName = "ps";
+        }
+
+
         String currentDate = DateUtil.getCurrentDate("yyyyMMdd");
         String timeStamp = DateCalendar.getUnixTimeStamp();
-
         ekvrawToFastrackFileConvertor.execute(csvFileOutputPath, fastrackFileOutputPath + currentDate + "-000000" + "." + fileHostName + "." + timeStamp + "000" + ".csv.force");
         log.info("done with CSV file to fastrack file\n");
         File f = new File(csvFileOutputPath);
@@ -428,24 +410,12 @@ public class BackfillController {
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
     }
 
-    public GoogleCloudFileToNetezzaFileConvertor getGoogleCloudFileToNetezzaFileConvertor() {
-        return googleCloudFileToNetezzaFileConvertor;
-    }
-
     public void setGoogleCloudFileToNetezzaFileConvertor(GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor) {
         this.googleCloudFileToNetezzaFileConvertor = googleCloudFileToNetezzaFileConvertor;
     }
 
-    public EkvrawToFastrackFileConvertor getEkvrawToFastrackFileConvertor() {
-        return ekvrawToFastrackFileConvertor;
-    }
-
     public void setEkvrawToFastrackFileConvertor(EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor) {
         this.ekvrawToFastrackFileConvertor = ekvrawToFastrackFileConvertor;
-    }
-
-    public NetezzaConnector getNetezzaConnector() {
-        return netezzaConnector;
     }
 
     public void setNetezzaConnector(NetezzaConnector netezzaConnector) {
@@ -466,18 +436,7 @@ public class BackfillController {
         } catch (Exception e) {
             log.error("[BackfillController.init]: ", e);
         }
-      /*  try {
-            FileDeleteUtil.deleteFilesUnderDir(ekvrawFileOutputPath, ".csv");
-        } catch (Exception e) {
-            log.error("[BackfillController.init]: ", e);
-        }
 
-        try {
-            FileDeleteUtil.deleteFilesUnderDir(fastrackFileOutputPath, ".csv.force");
-        } catch (Exception e) {
-            log.error("[BackfillController.init]: ", e);
-        }
-*/
         try {
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
             DirCreateUtil.createDirectory(new File(ekvrawFileOutputPath));
