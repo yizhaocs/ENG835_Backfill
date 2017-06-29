@@ -11,7 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
-
+/**
+ * mode=testing_backfill
+ * curl "http://localhost:8080/backfill/run?mode=testing_backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-01"
+ */
 /**
  * mode=backfill
  * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2016-05"
@@ -92,7 +95,7 @@ public class BackfillServlet implements HttpRequestHandler {
         }
 
         try {
-            if (mode.equals(Constants.Mode.BACKFILL) || mode.equals(Constants.Mode.DUMP_EKVRAW)) {
+            if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL) || mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 option = req.getParameter("option");
                 table = req.getParameter("table");
                 startDate = req.getParameter("startDate");

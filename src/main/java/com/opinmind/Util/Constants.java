@@ -5,6 +5,7 @@ package com.opinmind.Util;
  */
 public class Constants {
     public final class Mode{
+        public static final String TESTING_BACKFILL = "testing_backfill";
         public static final String BACKFILL = "backfill";
         public static final String DUMP_EKVRAW = "dump_ekvraw";
         public static final String EKVRAW_TO_FASTRACK = "ekvrawToFastrack";

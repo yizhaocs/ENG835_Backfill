@@ -95,6 +95,7 @@ public class BackfillController {
     private String netezzaCloudFiles = DEFAULT_FILE_PATH + "processedFiles/netezza/";
     private GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor = null;
     private NetezzaConnector netezzaConnector = null;
+    private String mode = null;
 
     public static MyWaitNotify getmMyWaitNotify() {
         return mMyWaitNotify;
@@ -136,6 +137,7 @@ public class BackfillController {
             log.error("table is null");
             return;
         }
+        this.mode = mode;
 
         String startYear = null;
         String startYearMonth = null;
@@ -290,10 +292,12 @@ public class BackfillController {
 
         if(deleteEKVRAW) {
             File f = new File(EKVRAW_FILE_PATH);
-            if (FileDeleteUtil.deleteFile(f) == 1) {
-                log.info(EKVRAW_FILE_PATH + " has deleted" + "\n");
-            } else {
-                log.info(EKVRAW_FILE_PATH + " has failed to delete" + "\n");
+            if(f.exists()) {
+                if (FileDeleteUtil.deleteFile(f) == 1) {
+                    log.info(EKVRAW_FILE_PATH + " has deleted" + "\n");
+                } else {
+                    log.info(EKVRAW_FILE_PATH + " has failed to delete" + "\n");
+                }
             }
         }
     }
@@ -325,7 +329,7 @@ public class BackfillController {
     private void runModedumpEkvrawFromNetezza(String table, String partition, String curYear, String curYearMonth) throws Exception {
         // true then partition by date, false then partition by reminder of event_id,
         if (partition == null) {
-            netezzaConnector.dataToCsvPartitionByYearMonth(table, curYear, curYearMonth);
+            netezzaConnector.dataToCsvPartitionByYearMonth(this.mode, table, curYear, curYearMonth);
         } else {
             netezzaConnector.dataToCsvPartitionByMod(table, partition);
         }
@@ -394,7 +398,7 @@ public class BackfillController {
 
         try {
             DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH));
-            DirCreateUtil.createDirectory(new File(EKVRAW_FILE_PATH));
+            DirCreateUtil.createDirectory(new File(DEFAULT_FILE_PATH + "ekvrawFile/"));
             DirCreateUtil.createDirectory(new File(fastrackFileOutputPath));
             DirCreateUtil.createDirectory(new File(googleCloudFiles));
             DirCreateUtil.createDirectory(new File(netezzaCloudFiles));

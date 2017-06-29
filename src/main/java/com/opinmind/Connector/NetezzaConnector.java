@@ -1,6 +1,7 @@
 package com.opinmind.Connector;
 
 import com.opinmind.BackfillController;
+import com.opinmind.Util.Constants;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -55,7 +56,7 @@ public class NetezzaConnector {
         }
     }
 
-    public void dataToCsvPartitionByYearMonth(String table, String year, String month) throws SQLException {
+    public void dataToCsvPartitionByYearMonth(String mode, String table, String year, String month) throws SQLException {
         Connection dbConnection = null;
         Statement statement = null;
 
@@ -73,10 +74,14 @@ public class NetezzaConnector {
                 "\n" +
                 "ORDER BY " + table + ".EVENT_ID";
 
+        if(mode != null && mode.equals(Constants.Mode.TESTING_BACKFILL)){
+            selectTableSQL += "\n" +
+                    "LIMIT 2000";
+        }
+
         try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
-
             log.info("execute query: \n" + selectTableSQL);
 
             // execute select SQL stetement
