@@ -158,7 +158,7 @@ public class BackfillController {
         if (option.equals("d")) {
             log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
 
-            if (mode.equals("backfill")) {
+            if (mode.equals(Constants.Mode.BACKFILL)) {
                 if (endDate != null) {
                     unusedFileCLeanThread();
                     String curYear = startYear;
@@ -173,7 +173,7 @@ public class BackfillController {
                     // only get one month
                     runBackfill(table, null, startYear, startYearMonth);
                 }
-            } else if (mode.equals("dump_ekvraw")) {
+            } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 if (endDate != null) {
                     String curYear = startYear;
                     String curYearMonth = startYearMonth;
@@ -190,7 +190,7 @@ public class BackfillController {
                 }
             }
         } else if (option.equals("r")) {
-            if (mode.equals("backfill")) {
+            if (mode.equals(Constants.Mode.BACKFILL)) {
                 unusedFileCLeanThread();
                 if (partition == null) {
                     int i = 0;
@@ -201,7 +201,7 @@ public class BackfillController {
                 } else {
                     runBackfill(table, partition, null, null);
                 }
-            } else if (mode.equals("dump_ekvraw")) {
+            } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 if (partition == null) {
                     int i = 0;
                     while (i < 10) {

@@ -1,6 +1,7 @@
 package com.opinmind.Servlets;
 
 import com.opinmind.BackfillController;
+import com.opinmind.Util.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.web.HttpRequestHandler;
 
@@ -72,7 +73,7 @@ public class BackfillServlet implements HttpRequestHandler {
         }
 
         try {
-            if (mode.equals("backfill") || mode.equals("dump_ekvraw")) {
+            if (mode.equals(Constants.Mode.BACKFILL) || mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 option = req.getParameter("option");
                 table = req.getParameter("table");
                 startDate = req.getParameter("startDate");
@@ -81,11 +82,11 @@ public class BackfillServlet implements HttpRequestHandler {
                     partition = req.getParameter("partition");
                 }
 
-                if (mode.equals("backfill") || mode.equals("dump_ekvraw")) {
+                if (mode.equals(Constants.Mode.BACKFILL) || mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                     log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw" + "\n");
                     backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition);
                 }
-            } else if (mode.equals("convert")) {
+            } else if (mode.equals(Constants.Mode.CONVERT)) {
                 inputPath = req.getParameter("inputPath");
                 outPutPath = req.getParameter("outPutPath");
                 monthYear = req.getParameter("monthYear");
