@@ -87,9 +87,9 @@ public class BackfillController {
     private static final Logger log = Logger.getLogger(BackfillController.class);
     private static final String DEFAULT_FILE_PATH = "/tmp/backfill/";
     private static final MyWaitNotify mMyWaitNotify = new MyWaitNotify();
+    public static String EKVRAW_FILE_PATH = DEFAULT_FILE_PATH + "ekvrawFile/ekvraw.csv";
     private static Map<String, ExecutorService> threadPools = new HashMap<String, ExecutorService>();
     public EkvrawToFastrackFileConvertor ekvrawToFastrackFileConvertor = null;
-    public static String EKVRAW_FILE_PATH = DEFAULT_FILE_PATH + "ekvrawFile/ekvraw.csv";
     private String fastrackFileOutputPath = DEFAULT_FILE_PATH + "fastrackFile/";
     private String googleCloudFiles = DEFAULT_FILE_PATH + "processedFiles/googleCloud/";
     private String netezzaCloudFiles = DEFAULT_FILE_PATH + "processedFiles/netezza/";
@@ -100,7 +100,22 @@ public class BackfillController {
         return mMyWaitNotify;
     }
 
-    public void runModeBackfill(String option, String table, String startDate, String endDate, String partition) throws Exception {
+    /**
+     *
+     * @param mode
+     * @param option
+     * @param table
+     * @param startDate
+     * @param endDate
+     * @param partition
+     * @throws Exception
+     */
+    public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition) throws Exception {
+        if (mode == null) {
+            log.error("mode is null");
+            return;
+        }
+
         if (option == null) {
             log.error("option is null");
             return;
@@ -141,47 +156,61 @@ public class BackfillController {
         }
 
         if (option.equals("d")) {
-            log.info("startYear:" + startYear);
-            log.info("startYearMonth:" + startYearMonth);
-            log.info("endYear:" + endYear);
-            log.info("endYearMonth:" + endYearMonth);
+            log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
 
-
-            if (endDate != null) {
-                unusedFileCLeanThread();
-                String curYear = startYear;
-                String curYearMonth = startYearMonth;
-                while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    runBackfill(table, null, curYear, curYearMonth);
-
-                    if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
-                        curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                    } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
-                        curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
-                        curYearMonth = "01";
-                    } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
-                        curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                    } else {
-                        log.info("curYear and curYearMonth are same as endYear and endYearMonth");
+            if (mode.equals("backfill")) {
+                if (endDate != null) {
+                    unusedFileCLeanThread();
+                    String curYear = startYear;
+                    String curYearMonth = startYearMonth;
+                    while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                        runBackfill(table, null, curYear, curYearMonth);
+                        curYearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
                     }
+                    // run for the final month
+                    runBackfill(table, null, curYear, curYearMonth);
+                } else {
+                    // only get one month
+                    runBackfill(table, null, startYear, startYearMonth);
                 }
+            } else if (mode.equals("dump_ekvraw")) {
+                if (endDate != null) {
+                    String curYear = startYear;
+                    String curYearMonth = startYearMonth;
+                    while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                        dumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
+                        curYearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                    }
 
-                // run for the final month
-                runBackfill(table, null, curYear, curYearMonth);
-            } else {
-                // only get one month
-                runBackfill(table, null, startYear, startYearMonth);
+                    // run for the final month
+                    dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
+                } else {
+                    // only get one month
+                    dumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
+                }
             }
         } else if (option.equals("r")) {
-            unusedFileCLeanThread();
-            if (partition == null) {
-                int i = 0;
-                while (i < 10) {
-                    runBackfill(table, String.valueOf(i), null, null);
-                    i++;
+            if (mode.equals("backfill")) {
+                unusedFileCLeanThread();
+                if (partition == null) {
+                    int i = 0;
+                    while (i < 10) {
+                        runBackfill(table, String.valueOf(i), null, null);
+                        i++;
+                    }
+                } else {
+                    runBackfill(table, partition, null, null);
                 }
-            } else {
-                runBackfill(table, partition, null, null);
+            } else if (mode.equals("dump_ekvraw")) {
+                if (partition == null) {
+                    int i = 0;
+                    while (i < 10) {
+                        dumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
+                        i++;
+                    }
+                } else {
+                    dumpEkvrawFromNetezza(table, partition, null, null);
+                }
             }
         }
     }
@@ -239,90 +268,6 @@ public class BackfillController {
         runModeConvert(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
     }
 
-    public void runModeDumpEKVraw(String option, String table, String startDate, String endDate, String partition) throws Exception {
-        if (option == null) {
-            log.error("option is null");
-            return;
-        }
-
-        if (option.equals("d")) {
-            if (startDate == null) {
-                log.error("startDate is null");
-                return;
-            }
-        } else if (option.equals("r")) {
-            if (partition == null) {
-                return;
-            }
-        }
-
-        if (table == null) {
-            log.error("table is null");
-            return;
-        }
-
-        String startYear = null;
-        String startYearMonth = null;
-        String endYear = null;
-        String endYearMonth = null;
-        if (option.equals("d")) {
-            if (startDate != null) {
-                String[] startYearDateStr = startDate.split("-");
-                startYear = startYearDateStr[0];
-                startYearMonth = startYearDateStr[1];
-            }
-
-            if (endDate != null) {
-                String[] endYearDateStr = endDate.split("-");
-                endYear = endYearDateStr[0];
-                endYearMonth = endYearDateStr[1];
-            }
-        }
-
-        if (option.equals("d")) {
-            log.info("startYear:" + startYear);
-            log.info("startYearMonth:" + startYearMonth);
-            log.info("endYear:" + endYear);
-            log.info("endYearMonth:" + endYearMonth);
-
-
-            if (endDate != null) {
-                String curYear = startYear;
-                String curYearMonth = startYearMonth;
-                while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                    dumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
-
-                    if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
-                        curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                    } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
-                        curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
-                        curYearMonth = "01";
-                    } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
-                        curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
-                    } else {
-                        log.info("curYear and curYearMonth are same as endYear and endYearMonth");
-                    }
-                }
-
-                // run for the final month
-                dumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
-            } else {
-                // only get one month
-                dumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
-            }
-        } else if (option.equals("r")) {
-            if (partition == null) {
-                int i = 0;
-                while (i < 10) {
-                    dumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
-                    i++;
-                }
-            } else {
-                dumpEkvrawFromNetezza(table, partition, null, null);
-            }
-        }
-    }
-
     public void runModeConvert(String inputPath, String outPutPath, String type) throws Exception {
         if (inputPath == null) {
             log.error("[BackfillController.runModeConvert]: inputPath is null");
@@ -340,7 +285,7 @@ public class BackfillController {
         }
 
         if (DirGetAllFiles.getAllFilesInDir(inputPath, ".csv").length == 0) {
-            log.info("[BackfillController.runModeConvert] inputPath:" + inputPath  + " with fileEndWith:" + ".csv" + " is empty");
+            log.info("[BackfillController.runModeConvert] inputPath:" + inputPath + " with fileEndWith:" + ".csv" + " is empty");
             return;
         }
 
@@ -356,7 +301,7 @@ public class BackfillController {
         }
     }
 
-    private void processEkvrawToGenerateFastrackFile() throws Exception{
+    private void processEkvrawToGenerateFastrackFile() throws Exception {
         log.info("done with ekv raws to CSV file \n");
         /**
          * hostName has startwith properties:
@@ -404,6 +349,20 @@ public class BackfillController {
         threadPool.execute(new FileProcessor(blockingQueue, outputDir, "foundNewFileInDir"));
     }
 
+    private String curYearMonthPlusOne(String curYear, String curYearMonth, String endYear, String endYearMonth){
+        if (!curYear.equals(endYear) && !curYearMonth.equals("12")) {
+            curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
+        } else if (!curYear.equals(endYear) && curYearMonth.equals("12")) {
+            curYear = new String(MathUtil.plusOne(curYear.toCharArray()));
+            curYearMonth = "01";
+        } else if (curYear.equals(endYear) && !curYearMonth.equals(endYearMonth)) {
+            curYearMonth = new String(MathUtil.plusOne(curYearMonth.toCharArray()));
+        } else {
+            log.info("curYear and curYearMonth are same as endYear and endYearMonth");
+        }
+        return curYearMonth;
+    }
+
     public void setGoogleCloudFileToNetezzaFileConvertor(GoogleCloudFileToNetezzaFileConvertor googleCloudFileToNetezzaFileConvertor) {
         this.googleCloudFileToNetezzaFileConvertor = googleCloudFileToNetezzaFileConvertor;
     }
@@ -416,7 +375,7 @@ public class BackfillController {
         this.netezzaConnector = netezzaConnector;
     }
 
-    private void unusedFileCLeanThread(){
+    private void unusedFileCLeanThread() {
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
         dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
         dirCleanThread("/opt/opinmind/var/google/ekvraw/error");

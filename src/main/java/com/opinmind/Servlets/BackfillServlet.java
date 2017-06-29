@@ -81,12 +81,9 @@ public class BackfillServlet implements HttpRequestHandler {
                     partition = req.getParameter("partition");
                 }
 
-                if (mode.equals("backfill")) {
-                    log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfill" + "\n");
-                    backfillController.runModeBackfill(option, table, startDate, endDate, partition);
-                } else if (mode.equals("dump_ekvraw")) {
-                    log.info("[BackfillServlet.handleRequest] is going to execute runModeDumpEKVraw" + "\n");
-                    backfillController.runModeDumpEKVraw(option, table, startDate, endDate, partition);
+                if (mode.equals("backfill") || mode.equals("dump_ekvraw")) {
+                    log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw" + "\n");
+                    backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition);
                 }
             } else if (mode.equals("convert")) {
                 inputPath = req.getParameter("inputPath");
