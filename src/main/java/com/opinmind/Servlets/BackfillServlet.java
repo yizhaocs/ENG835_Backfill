@@ -41,7 +41,7 @@ public class BackfillServlet implements HttpRequestHandler {
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String mode = req.getParameter("mode"); // convert is convert google cloud files to Netezza file, dump is dump the ekvraw and consolited them by event_id
-        // for mode = backfill or dump
+        // for mode = testing_backfill or backfill or dump_ekvraw or ekvrawToFastrack or convert
         String option = null; // r is partition by reminder, d is partition by date
         String table = null;
         String startDate = null;
