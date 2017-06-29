@@ -11,6 +11,25 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
+
+/**
+ * mode=backfill
+ * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2016-05"
+ */
+/**
+ * mode=dump_ekvraw
+ * curl "http://localhost:8080/backfill/run?mode=dump_ekvraw&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-03"
+ */
+/**
+ * mode=ekvrawToFastrack
+ * curl "http://localhost:8080/backfill/run?mode=ekvrawToFastrack&deleteEKVRAW=1"
+ * curl "http://localhost:8080/backfill/run?mode=ekvrawToFastrack&deleteEKVRAW=0"
+ */
+/**
+ * mode=convert
+ * curl "http://localhost:8080/backfill/run?mode=convert&inputPath=/workplace/yzhao/googleFiles/apac/flightFiles/122016/&outPutPath=/workplace/yzhao/netezzaFiles/apac/flightFiles/122016&monthYear=122016&type=hotel&partition="
+ */
+
 /**
  * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=ENG759_BACKFILL_PRICELINE&startDate=2016-04&endDate=2016-05"
  * curl "http://localhost:8080/backfill/run?mode=backfill&option=d&table=eng759_backfill_apac&startDate=2016-12&endDate=2017-01"
@@ -85,6 +104,13 @@ public class BackfillServlet implements HttpRequestHandler {
                 if (mode.equals(Constants.Mode.BACKFILL) || mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                     log.info("[BackfillServlet.handleRequest] is going to execute runModeBackfillOrDumpEKVraw" + "\n");
                     backfillController.runModeBackfillOrDumpEKVraw(mode, option, table, startDate, endDate, partition);
+                }
+            }else if (mode.equals(Constants.Mode.EKVRAW_TO_FASTRACK)) {
+                String deleteEKVRAW = req.getParameter("deleteEKVRAW");
+                if(deleteEKVRAW.equals("1")){
+                    backfillController.processEkvrawToGenerateFastrackFile(true);
+                }else{
+                    backfillController.processEkvrawToGenerateFastrackFile(false);
                 }
             } else if (mode.equals(Constants.Mode.CONVERT)) {
                 inputPath = req.getParameter("inputPath");
