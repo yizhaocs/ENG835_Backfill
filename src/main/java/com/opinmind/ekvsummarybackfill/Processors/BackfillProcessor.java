@@ -28,17 +28,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author YI ZHAO
 
-mvn clean package
-scp /Users/yzhao/IdeaProjects/ENG835_Backfill/target/backfill.war manager:/home/yzhao/
+scp /Users/yzhao/IdeaProjects/ENG835_Backfill/target/ekvsummarybackfill.war manager:/home/yzhao/
 ssh manager
-scp backfill.war 68.67.146.136:/home/yzhao
+scp ekvsummarybackfill.war 68.67.146.136:/home/yzhao
 ssh 68.67.146.136
-sudo rm /opt/apache-tomcat/webapps/backfill.war
-sudo chown -R om:om backfill.war
-sudo mv backfill.war /opt/apache-tomcat/webapps/
+sudo rm /opt/apache-tomcat/webapps/ekvsummarybackfill.war
+sudo chown -R om:om ekvsummarybackfill.war
+sudo mv ekvsummarybackfill.war /opt/apache-tomcat/webapps/
 sudo rm -rf /opt/opinmind/var/
 sudo rm -rf /opt/opinmind/logs/hdu/
-sudo rm -rf /opt/opinmind/logs/backfill/
+sudo rm -rf /opt/opinmind/logs/ekvsummarybackfill/
 sudo rm -rf /opt/opinmind/var/udcuv2/archive
 sudo rm -rf /opt/opinmind/var/udcuv2/inbox
 sudo /sbin/service tomcat stop_force

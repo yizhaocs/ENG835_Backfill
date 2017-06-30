@@ -5,7 +5,7 @@ import com.opinmind.ekvsummarybackfill.Util.FileUtils.DirGetAllFiles;
 import org.apache.log4j.Logger;
 
 /**
- * Created by yzhao on 6/30/17.
+ * @author YI ZHAO
  */
 public class ConvertProcessor {
     private final Logger log = Logger.getLogger(ConvertProcessor.class);
