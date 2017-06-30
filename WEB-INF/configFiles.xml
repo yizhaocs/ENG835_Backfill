@@ -8,7 +8,7 @@
 		<property name="targetMethod" value="initLogging" />
 		<property name="arguments">
 			<list>
-				<value>file:///opt/opinmind/conf/backfill/backfill.log4j.properties</value>
+				<value>file:///opt/opinmind/conf/ekvsummarybackfill/ekvsummarybackfill.log4j.properties</value>
 			</list>
 		</property>
 	</bean>
@@ -22,7 +22,7 @@
 	<bean id="configFileList" class="java.util.LinkedList">
 		<constructor-arg>
 			<list>
-				<value>file:///opt/opinmind/conf/backfill/config.properties</value>
+				<value>file:///opt/opinmind/conf/ekvsummarybackfill/config.properties</value>
 			</list>
 		</constructor-arg>
 	</bean>
