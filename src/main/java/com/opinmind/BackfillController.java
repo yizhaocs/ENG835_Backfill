@@ -80,120 +80,126 @@ public class BackfillController {
      * @param partition
      * @throws Exception
      */
-    public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition, SendEmail sendEmail) throws Exception {
-        init();
-        if (mode == null) {
-            log.error("mode is null");
-            return;
-        }
-
-        if (option == null) {
-            log.error("option is null");
-            return;
-        }
-
-        if (option.equals("d")) {
-            if (startDate == null) {
-                log.error("startDate is null");
+    public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition, SendEmail sendEmail) {
+        try {
+            init();
+            if (mode == null) {
+                log.error("mode is null");
                 return;
             }
-        } else if (option.equals("r")) {
-            if (partition == null) {
+
+            if (option == null) {
+                log.error("option is null");
                 return;
             }
-        }
 
-        if (table == null) {
-            log.error("table is null");
-            return;
-        }
-        this.mode = mode;
-
-        String startYear = null;
-        String startYearMonth = null;
-        String endYear = null;
-        String endYearMonth = null;
-        if (option.equals("d")) {
-            if (startDate != null) {
-                String[] startYearDateStr = startDate.split("-");
-                startYear = startYearDateStr[0];
-                startYearMonth = startYearDateStr[1];
+            if (option.equals("d")) {
+                if (startDate == null) {
+                    log.error("startDate is null");
+                    return;
+                }
+            } else if (option.equals("r")) {
+                if (partition == null) {
+                    return;
+                }
             }
 
-            if (endDate != null) {
-                String[] endYearDateStr = endDate.split("-");
-                endYear = endYearDateStr[0];
-                endYearMonth = endYearDateStr[1];
+            if (table == null) {
+                log.error("table is null");
+                return;
             }
-        }
+            this.mode = mode;
 
-        if (option.equals("d")) {
-            log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
+            String startYear = null;
+            String startYearMonth = null;
+            String endYear = null;
+            String endYearMonth = null;
+            if (option.equals("d")) {
+                if (startDate != null) {
+                    String[] startYearDateStr = startDate.split("-");
+                    startYear = startYearDateStr[0];
+                    startYearMonth = startYearDateStr[1];
+                }
 
-            if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL)) {
-                unusedFileCLeanThread();
                 if (endDate != null) {
-                    String curYear = startYear;
-                    String curYearMonth = startYearMonth;
-                    while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                    String[] endYearDateStr = endDate.split("-");
+                    endYear = endYearDateStr[0];
+                    endYearMonth = endYearDateStr[1];
+                }
+            }
+
+            if (option.equals("d")) {
+                log.info("[BackfillController.runModeBackfillOrDumpEKVraw] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
+
+                if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL)) {
+                    unusedFileCLeanThread();
+                    if (endDate != null) {
+                        String curYear = startYear;
+                        String curYearMonth = startYearMonth;
+                        while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                            runBackfill(table, null, curYear, curYearMonth);
+                            String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                            curYear = yearMonth[0];
+                            curYearMonth = yearMonth[1];
+                            sendEmail.send(table, null, curYear, curYearMonth, false);
+
+                        }
+                        // run for the final month
                         runBackfill(table, null, curYear, curYearMonth);
-                        String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
-                        curYear = yearMonth[0];
-                        curYearMonth = yearMonth[1];
-                        sendEmail.send(table, null, curYear, curYearMonth, false);
-
+                        sendEmail.send(table, null, startYear, startYearMonth, false);
+                    } else {
+                        // only get one month
+                        runBackfill(table, null, startYear, startYearMonth);
+                        sendEmail.send(table, null, startYear, startYearMonth, false);
                     }
-                    // run for the final month
-                    runBackfill(table, null, curYear, curYearMonth);
-                    sendEmail.send(table, null, startYear, startYearMonth, false);
-                } else {
-                    // only get one month
-                    runBackfill(table, null, startYear, startYearMonth);
-                    sendEmail.send(table, null, startYear, startYearMonth, false);
+                } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
+                    if (endDate != null) {
+                        String curYear = startYear;
+                        String curYearMonth = startYearMonth;
+                        while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
+                            runModedumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
+                            String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
+                            curYear = yearMonth[0];
+                            curYearMonth = yearMonth[1];
+                        }
+
+                        // run for the final month
+                        runModedumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
+                    } else {
+                        // only get one month
+                        runModedumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
+                    }
                 }
-            } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
-                if (endDate != null) {
-                    String curYear = startYear;
-                    String curYearMonth = startYearMonth;
-                    while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                        runModedumpEkvrawFromNetezza(table, null, curYear, curYearMonth);
-                        String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
-                        curYear = yearMonth[0];
-                        curYearMonth = yearMonth[1];
+            } else if (option.equals("r")) {
+                if (mode.equals(Constants.Mode.BACKFILL)) {
+                    unusedFileCLeanThread();
+                    if (partition == null) {
+                        int i = 0;
+                        while (i < 10) {
+                            runBackfill(table, String.valueOf(i), null, null);
+                            i++;
+                        }
+                    } else {
+                        runBackfill(table, partition, null, null);
                     }
-
-                    // run for the final month
-                    runModedumpEkvrawFromNetezza(table, partition, curYear, curYearMonth);
-                } else {
-                    // only get one month
-                    runModedumpEkvrawFromNetezza(table, partition, startYear, startYearMonth);
+                } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
+                    if (partition == null) {
+                        int i = 0;
+                        while (i < 10) {
+                            runModedumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
+                            i++;
+                        }
+                    } else {
+                        runModedumpEkvrawFromNetezza(table, partition, null, null);
+                    }
                 }
             }
-        } else if (option.equals("r")) {
-            if (mode.equals(Constants.Mode.BACKFILL)) {
-                unusedFileCLeanThread();
-                if (partition == null) {
-                    int i = 0;
-                    while (i < 10) {
-                        runBackfill(table, String.valueOf(i), null, null);
-                        i++;
-                    }
-                } else {
-                    runBackfill(table, partition, null, null);
-                }
-            } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
-                if (partition == null) {
-                    int i = 0;
-                    while (i < 10) {
-                        runModedumpEkvrawFromNetezza(table, String.valueOf(i), null, null);
-                        i++;
-                    }
-                } else {
-                    runModedumpEkvrawFromNetezza(table, partition, null, null);
-                }
-            }
+
+        }catch(Exception e){
+            log.error("[BackfillController.runModeBackfillOrDumpEKVraw]: ", e);
+        }finally {
+            destroy();
         }
-        destroy();
     }
 
     private void runBackfill(String table, String partition, String curYear, String curYearMonth) throws Exception {
