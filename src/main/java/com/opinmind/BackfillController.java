@@ -81,6 +81,7 @@ public class BackfillController {
      * @throws Exception
      */
     public void runModeBackfillOrDumpEKVraw(String mode, String option, String table, String startDate, String endDate, String partition, SendEmail sendEmail) throws Exception {
+        init();
         if (mode == null) {
             log.error("mode is null");
             return;
@@ -150,7 +151,6 @@ public class BackfillController {
                     runBackfill(table, null, startYear, startYearMonth);
                     sendEmail.send(table, null, startYear, startYearMonth, false);
                 }
-                destroy();
             } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                 if (endDate != null) {
                     String curYear = startYear;
@@ -193,6 +193,7 @@ public class BackfillController {
                 }
             }
         }
+        destroy();
     }
 
     private void runBackfill(String table, String partition, String curYear, String curYearMonth) throws Exception {
