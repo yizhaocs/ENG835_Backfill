@@ -127,19 +127,16 @@ public class BackfillProcessor {
                         String curYear = startYear;
                         String curYearMonth = startYearMonth;
                         while (!curYear.equals(endYear) || !curYearMonth.equals(endYearMonth)) {
-                            runBackfill(table, null, curYear, curYearMonth);
-                            sendEmail.send(table, null, curYear, curYearMonth, false);
+                            runBackfill(table, null, curYear, curYearMonth, sendEmail);
                             String[] yearMonth = curYearMonthPlusOne(curYear, curYearMonth, endYear, endYearMonth);
                             curYear = yearMonth[0];
                             curYearMonth = yearMonth[1];
                         }
                         // run for the final month
-                        runBackfill(table, null, curYear, curYearMonth);
-                        sendEmail.send(table, null, curYear, curYearMonth, false);
+                        runBackfill(table, null, curYear, curYearMonth, sendEmail);
                     } else {
                         // only get one month
-                        runBackfill(table, null, startYear, startYearMonth);
-                        sendEmail.send(table, null, startYear, startYearMonth, false);
+                        runBackfill(table, null, startYear, startYearMonth, sendEmail);
                     }
                 } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                     if (endDate != null) {
@@ -165,11 +162,11 @@ public class BackfillProcessor {
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
-                            runBackfill(table, String.valueOf(i), null, null);
+                            runBackfill(table, String.valueOf(i), null, null, sendEmail);
                             i++;
                         }
                     } else {
-                        runBackfill(table, partition, null, null);
+                        runBackfill(table, partition, null, null, sendEmail);
                     }
                 } else if (mode.equals(Constants.Mode.DUMP_EKVRAW)) {
                     if (partition == null) {
@@ -191,7 +188,7 @@ public class BackfillProcessor {
         }
     }
 
-    private void runBackfill(String table, String partition, String curYear, String curYearMonth) throws Exception {
+    private void runBackfill(String table, String partition, String curYear, String curYearMonth, SendEmail sendEmail) throws Exception {
         log.info("[BackfillController.runBackfill] with table:" + table + " ,partition:" + partition + " ,curYear:" + curYear + " ,curYearMonth:" + curYearMonth);
 
         String processedGoogleCloudHotelFilePath = Constants.Files.googleCloudFiles + table + "/hotel/" + curYear + "-" + curYearMonth;
@@ -242,6 +239,9 @@ public class BackfillProcessor {
         log.info("------------Executing Step 8 - convert google flight file to Netezza file------------");
         DirCreateUtil.createDirectory(new File(processedNetezzaFlightFilePath));
         convertProcessor.execute(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
+
+        // Step 9 - sendEmail
+        sendEmail.send(table, null, curYear, curYearMonth, false);
     }
 
 
