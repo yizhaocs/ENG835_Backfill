@@ -70,11 +70,14 @@ public class BackfillServlet implements HttpRequestHandler {
                 }
 
                 log.info("[BackfillServlet.handleRequest] is going to execute backfillProcessor.execute");
+                backfillProcessor.init();
                 backfillProcessor.execute(mode, option, table, startDate, endDate, partition, sendEmail);
                 sendEmail.send(table, null, null, null, true, false);
             }
         } catch (Exception e) {
             log.error("[BackfillServlet.handleRequest]: ", e);
+        }finally {
+            backfillProcessor.destroy();
         }
 
     }

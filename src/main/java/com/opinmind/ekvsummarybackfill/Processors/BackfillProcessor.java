@@ -54,6 +54,7 @@ public class BackfillProcessor {
     private EkvrawToFastrackProcessor ekvrawToFastrackProcessor = null;
     private ConvertProcessor convertProcessor = null;
     private String mode = null;
+    private boolean isCleanStarted = false;
 
 
     public static MyWaitNotify getmMyWaitNotify() {
@@ -183,9 +184,10 @@ public class BackfillProcessor {
 
         }catch(Exception e){
             sendEmail.send(table, null, null, null,false, true);
+            destroy();
             log.error("[BackfillController.execute]: ", e);
         }finally {
-            destroy();
+
         }
     }
 
@@ -321,11 +323,14 @@ public class BackfillProcessor {
     }
 
     private void unusedFileCLeanThread() {
-        dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
-        dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
-        dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
-        dirCleanThread("/opt/opinmind/var/google/ekvraw/concat");
-        dirCleanThread("/opt/opinmind/var/udcuv2/archive");
+        if(!isCleanStarted) {
+            isCleanStarted = true;
+            dirCleanThread("/opt/opinmind/var/hdfs/ekv/archive");
+            dirCleanThread("/opt/opinmind/var/hdfs/ekv/concat");
+            dirCleanThread("/opt/opinmind/var/google/ekvraw/error");
+            dirCleanThread("/opt/opinmind/var/google/ekvraw/concat");
+            dirCleanThread("/opt/opinmind/var/udcuv2/archive");
+        }
     }
 
     public void init() {
