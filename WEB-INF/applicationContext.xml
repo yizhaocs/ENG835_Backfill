@@ -7,43 +7,43 @@
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
-    <bean id="backfillServlet" class="com.opinmind.ekvsummarybackfill.Servlets.BackfillServlet" init-method="init" destroy-method="destroy">
+    <bean id="backfillServlet" class="com.opinmind.ekvsumbf.Servlets.BackfillServlet" init-method="init" destroy-method="destroy">
         <property name="backfillProcessor" ref="backfillProcessor" />
     </bean>
 
-    <bean id="convertServlet" class="com.opinmind.ekvsummarybackfill.Servlets.ConvertServlet" init-method="init" destroy-method="destroy">
+    <bean id="convertServlet" class="com.opinmind.ekvsumbf.Servlets.ConvertServlet" init-method="init" destroy-method="destroy">
         <property name="convertProcessor" ref="convertProcessor" />
     </bean>
 
-    <bean id="ekvrawToFastrackServlet" class="com.opinmind.ekvsummarybackfill.Servlets.EkvrawToFastrackServlet" init-method="init" destroy-method="destroy">
+    <bean id="ekvrawToFastrackServlet" class="com.opinmind.ekvsumbf.Servlets.EkvrawToFastrackServlet" init-method="init" destroy-method="destroy">
         <property name="ekvrawToFastrackProcessor" ref="ekvrawToFastrackProcessor" />
     </bean>
 
 
-    <bean id="backfillProcessor" class="com.opinmind.ekvsummarybackfill.Processors.BackfillProcessor"
+    <bean id="backfillProcessor" class="com.opinmind.ekvsumbf.Processors.BackfillProcessor"
           init-method="init" destroy-method="destroy">
         <property name="netezzaConnector" ref="netezzaConnector" />
         <property name="ekvrawToFastrackProcessor" ref="ekvrawToFastrackProcessor" />
         <property name="convertProcessor" ref="convertProcessor" />
     </bean>
 
-    <bean id="convertProcessor" class="com.opinmind.ekvsummarybackfill.Processors.ConvertProcessor" init-method="init" destroy-method="destroy">
+    <bean id="convertProcessor" class="com.opinmind.ekvsumbf.Processors.ConvertProcessor" init-method="init" destroy-method="destroy">
         <property name="googleCloudFileToNetezzaFileConvertor" ref="googleCloudFileToNetezzaFileConvertor" />
     </bean>
 
-    <bean id="ekvrawToFastrackProcessor" class="com.opinmind.ekvsummarybackfill.Processors.EkvrawToFastrackProcessor" init-method="init" destroy-method="destroy">
+    <bean id="ekvrawToFastrackProcessor" class="com.opinmind.ekvsumbf.Processors.EkvrawToFastrackProcessor" init-method="init" destroy-method="destroy">
         <property name="ekvrawToFastrackFileConvertor" ref="ekvrawToFastrackFileConvertor" />
     </bean>
 
-    <bean id="ekvrawToFastrackFileConvertor" class="com.opinmind.ekvsummarybackfill.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
+    <bean id="ekvrawToFastrackFileConvertor" class="com.opinmind.ekvsumbf.Converter.EkvrawToFastrackFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
-    <bean id="googleCloudFileToNetezzaFileConvertor" class="com.opinmind.ekvsummarybackfill.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
+    <bean id="googleCloudFileToNetezzaFileConvertor" class="com.opinmind.ekvsumbf.Converter.GoogleCloudFileToNetezzaFileConvertor" init-method="init" destroy-method="destroy">
     </bean>
 
 
 
-    <bean id="netezzaConnector" class="com.opinmind.ekvsummarybackfill.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">
+    <bean id="netezzaConnector" class="com.opinmind.ekvsumbf.Connector.NetezzaConnector" init-method="init" destroy-method="destroy">
         <property name="DB_CONNECTION" value="${db_connection}" />
         <property name="DB_USER" value="${db_user}" />
         <property name="DB_PASSWORD" value="${db_password}" />
