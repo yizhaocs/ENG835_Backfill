@@ -122,7 +122,7 @@ public class BackfillProcessor {
                 log.info("[BackfillController.execute] startYear:" + startYear + " ,startYearMonth:" + startYearMonth + " ,endYear:" + endYear + " ,endYearMonth:" + endYearMonth);
 
                 if (mode.equals(Constants.Mode.TESTING_BACKFILL) || mode.equals(Constants.Mode.BACKFILL)) {
-                    unusedFileCLeanThread();
+                    // unusedFileCLeanThread();
                     if (endDate != null) {
                         String curYear = startYear;
                         String curYearMonth = startYearMonth;
@@ -158,7 +158,7 @@ public class BackfillProcessor {
                 }
             } else if (option.equals("r")) {
                 if (mode.equals(Constants.Mode.BACKFILL)) {
-                    unusedFileCLeanThread();
+                    // unusedFileCLeanThread();
                     if (partition == null) {
                         int i = 0;
                         while (i < 10) {
@@ -343,6 +343,8 @@ public class BackfillProcessor {
         } catch (Exception e) {
             log.error("[BackfillController.init]: ", e);
         }
+
+        unusedFileCLeanThread();
     }
 
     public void destroy() {
