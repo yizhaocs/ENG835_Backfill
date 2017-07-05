@@ -182,6 +182,7 @@ public class BackfillProcessor {
             }
 
         }catch(Exception e){
+            sendEmail.send(table, null, null, null,false, true);
             log.error("[BackfillController.execute]: ", e);
         }finally {
             destroy();
@@ -241,7 +242,7 @@ public class BackfillProcessor {
         convertProcessor.execute(processedGoogleCloudFlightFilePath, processedNetezzaFlightFilePath + "/ekv_flight" + "_all_netezza-" + curYear + "-" + curYearMonth + "_" + Constants.Type.FLIGHT + "_001.csv", Constants.Type.FLIGHT);
 
         // Step 9 - sendEmail
-        sendEmail.send(table, null, curYear, curYearMonth, false);
+        sendEmail.send(table, null, curYear, curYearMonth, false, false);
     }
 
 
